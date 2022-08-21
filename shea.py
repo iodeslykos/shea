@@ -71,14 +71,14 @@ async def dice_roll(self, dice: int, sides: int):
     nice_try = f"I can't do that, {self.author.mention}."
     if dice > 25 or sides > 9999999999:
         await self.respond(nice_try)
-        logger.info(self, f"User {self.author}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
+        logger.warning(f"User {self.author}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
     else:
         self.roll_results = []
         for i in range(dice):
-            roll_result = random.randint(1, x)
+            roll_result = random.randint(1, sides)
             self.roll_results.append(roll_result)
         for i in range(dice):
-            await self.send(f"Die #{i+1}: {self.roll_results[i]}")
+            await self.respond(f"Die #{i+1}: {self.roll_results[i]}")
             sleep(0.25)
 
 
@@ -88,7 +88,7 @@ async def roll(self, dice: int, sides: int):
     nice_try = "lol Nice try. :alien: :middle_finger:"
     if dice > 25 or sides > 9999999999:
         await self.respond(nice_try)
-        logger.info(self, f"User {self.author}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
+        logger.warning(f"{self.author.mention}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
     else:
         self.roll_results = []
         for i in range(dice):
@@ -103,14 +103,16 @@ async def roll(self, dice: int, sides: int):
 @bae.command(name="spaghetti_wolf")
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
-    await self.send("`insert spaghetti wolf here`")
+    logger.info(f"{self.author.mention} requested `spaghetti_wolf`")
+    await self.respond("`insert spaghetti wolf here`")
 
 
 @bae.slash_command()
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
+    logger.info(f"{self.author.mention} requested `spaghetti_wolf`")
     await self.respond(":spaghetti::wolf:")
-    await self.respond("^^^ Placeholder until I learn to attach images.")
+    await self.send("^^^ Placeholder until I learn to attach images.\nHelp?")
 
 
 @bae.command(name="pingg")
@@ -121,12 +123,12 @@ async def ping(self):
 
 @bae.slash_command(name="ping")
 async def ping(self):
-    """Confirm that the bot is running."""
+    f"""Confirm that the bot is running."""
     i = random.randint(0, 1)
     if i == 0:
         await self.respond(f"Received ping from {self.author.mention}. Ack?")
     elif i == 1:
-        await self.respond(f"Yes, I'm here {self.author.mention}.")
+        await self.respond(f"Yes, I'm here. Thanks for asking, {self.author.mention}.")
     else:
         await self.respond(f"There is no \"why\", {self.author.mention}.")
 

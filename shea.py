@@ -66,20 +66,20 @@ async def on_error():
 
 
 @bae.command(name="roll")
-async def dice_roll(self, n: int, x: int):
+async def dice_roll(self, dice: int, sides: int):
     """Rolls the dice."""
     nice_try = f"I can't do that, {self.author.mention}."
-    if n > 25 or x > 9999999999:
+    if dice > 25 or sides > 9999999999:
         await self.respond(nice_try)
-        logger.info(self, f"User {self.author}'s request was out of bounds: DICE: {n}, SIDES: {x}.")
+        logger.info(self, f"User {self.author}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
     else:
         self.roll_results = []
-        for i in range(n):
+        for i in range(dice):
             roll_result = random.randint(1, x)
             self.roll_results.append(roll_result)
-        for i in range(n):
+        for i in range(dice):
             await self.send(f"Die #{i+1}: {self.roll_results[i]}")
-            sleep(0.5)
+            sleep(0.25)
 
 
 @bae.slash_command()
@@ -88,7 +88,7 @@ async def roll(self, dice: int, sides: int):
     nice_try = "lol Nice try. :alien: :middle_finger:"
     if dice > 25 or sides > 9999999999:
         await self.respond(nice_try)
-        logger.info(self, f"User {self.author}'s request was out of bounds: DICE: {n}, SIDES: {x}.")
+        logger.info(self, f"User {self.author}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
     else:
         self.roll_results = []
         for i in range(dice):

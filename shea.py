@@ -14,19 +14,20 @@ import sys
 import json
 import logging
 
-shea_version = "0.0.4"
+shea_version = "0.0.5"
 
 ########################################################################################################################
 # Configuration.
 ########################################################################################################################
 
 CONFIG = {}
+CONFIG_PATH = 'config.json'
 
 try:
-    CONFIG_FILE = open('config.json', 'r')
+    CONFIG_FILE = open(CONFIG_PATH, 'r')
     CONFIG = json.load(CONFIG_FILE)
-except TypeError:
-    print(f"[ERROR] Unable to load configuration file: \'config.json\'")
+except FileNotFoundError:
+    print(f"[ERROR] Unable to load configuration file: \'{CONFIG_PATH}\'")
     exit(1)
 
 BOT_TOKEN = CONFIG['bot_token']
@@ -49,7 +50,7 @@ file_handler = logging.FileHandler(
     filename=LOG_FILE, encoding='utf-8', mode='a')
 file_handler.setLevel(LOG_LEVEL)
 file_handler.setFormatter(logging.Formatter(
-    '%(asctime)s - %(name)s - :[%(levelname)s] %(message)s', datefmt=LOG_TIMESTAMP_FORMAT))
+    '%(asctime)s [%(levelname)s] %(funcName)s: %(message)s', datefmt=LOG_TIMESTAMP_FORMAT))
 logger.addHandler(file_handler)
 
 MEDIA_DIR = CONFIG['media_dir']
@@ -90,10 +91,11 @@ async def on_error():
 @bae.command(name="roll")
 async def dice_roll(self, dice: int, sides: int):
     """Rolls the dice."""
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
     nice_try = f"I can't do that, {self.author.mention}."
     if dice > 25 or sides > sys.maxsize:
         await self.respond(nice_try)
-        logger.warning(f"User {self.author}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
+        logger.warning(f"User {self.author.name} (ID: {self.author.id}) requested too many dice!")
     else:
         self.roll_results = []
         for i in range(dice):
@@ -103,22 +105,25 @@ async def dice_roll(self, dice: int, sides: int):
         for i in range(dice):
             await self.respond(f"Die #{i+1}: {self.roll_results[i]}")
             sleep(0.5)
+        logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
 
 
 @bae.slash_command()
 async def roll(self, dice: int, sides: int):
     """Roll the dice."""
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
     nice_try = "lol Nice try. :alien: :middle_finger:"
     if dice > 25 or sides > sys.maxsize:
         await self.respond(nice_try)
-        logger.warning(f"{self.author.mention}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
+        logger.warning(f"User {self.author.name} (ID: {self.author.id}) requested too many dice!")
     else:
         self.roll_results = []
+        await self.respond(f"Rolling {dice} dice with {sides} sides for {self.author.mention}!")
         for i in range(dice):
             # randbelow() generates a number between 0 and n, so add one.
             roll_result = secrets.randbelow(sides) + 1
             self.roll_results.append(roll_result)
-        await self.respond(f"Rolling {dice} dice with {sides} sides for {self.author.mention}!")
+        logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
         for i in range(dice):
             await self.respond(f"Die #{i+1}: {self.roll_results[i]}")
             sleep(0.5)
@@ -127,12 +132,13 @@ async def roll(self, dice: int, sides: int):
 @bae.command(name="spaghetti_wolf")
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
-    logger.info(f"{self.author.id} requested spaghetti_wolf")
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested spaghetti_wolf")
     try:
         image_path = os.path.join(MEDIA_DIR['image'], "_spaghetti_wolf.png")
         await self.send(file=discord.File(image_path))
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf")
     except FileNotFoundError:
-        logger.warning(f"{self.author.id} requested spaghetti wolf, but it was not found!")
+        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found!")
         await self.respond(":spaghetti::wolf: is the best I can do.")
     finally:
         sleep(0.5)
@@ -141,12 +147,13 @@ async def spaghetti_wolf(self):
 @bae.slash_command()
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
-    logger.info(f"{self.author.id} requested spaghetti_wolf")
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested spaghetti_wolf")
     try:
         image_path = os.path.join(MEDIA_DIR['image'], "_spaghetti_wolf.png")
         await self.respond(file=discord.File(image_path))
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf")
     except FileNotFoundError:
-        logger.warning(f"{self.author.id} requested spaghetti wolf, but it was not found!")
+        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found!")
         await self.respond(":spaghetti::wolf: is the best I can do.")
     finally:
         sleep(0.5)
@@ -155,37 +162,52 @@ async def spaghetti_wolf(self):
 @bae.command(name="ping")
 async def ping(self):
     """Confirm that the bot is running."""
-    await self.send(f"Received ping from {self.author.mention}. Ack?")
+    logger.info(f"{self.author.name} (ID: {self.author.id}) sent a ping request")
+    try:
+        await self.send(f"Received ping from {self.author.mention}. Ack?")
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a reply.")
+    except Exception as ping_error:
+        logger.error(f"Failed to respond to ping from {self.author.name} (ID: {self.author.id}!", ping_error)
 
 
 @bae.slash_command(name="ping")
 async def ping(self):
     f"""Confirm that the bot is running."""
-    i = random.randint(0, 1)
-    if i == 0:
-        await self.respond(f"Received ping from {self.author.mention}. Ack?")
-    elif i == 1:
-        await self.respond(f"Yes, I'm here. Thanks for asking, {self.author.mention}.")
-    else:
-        await self.respond(f"There is no \"why\", {self.author.mention}.")
+    logger.info(f"{self.author.name} (ID: {self.author.id}) sent a ping request")
+    try:
+        i = secrets.randbelow(3)
+        if i == 0:
+            await self.respond(f"Received ping from {self.author.mention}. Ack?")
+        elif i == 1:
+            await self.respond(f"Yes, I'm here. Thanks for asking, {self.author.mention}.")
+        else:
+            await self.respond(f"There is no \"why\", {self.author.mention}.")
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a reply.")
+    except Exception as ping_error:
+        logger.error(f"Failed to respond to ping from {self.author.name} (ID: {self.author.id}!", ping_error)
 
 
 @bae.slash_command(name="gimme_user_data")
 async def gimme_user_data(self):
     """Yummy user data."""
-    user_data = {
-        'self': {
-            'self.author.mention': self.author.mention,
-            'self.author.id': self.author.id,
-            'self.author.name': self.author.name,
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested their user data")
+    try:
+        user_data = {
+            'self': {
+                'self.author.mention': self.author.mention,
+                'self.author.id': self.author.id,
+                'self.author.name': self.author.name,
+            }
         }
-    }
-    await self.respond("```" + json.dumps(user_data, indent=4) + "```")
+        await self.respond("```" + json.dumps(user_data, indent=4) + "```")
+    except Exception as gimme_user_fail:
+        logger.error(f"{self.author.name} (ID: {self.author.id}) did not receive their user data!", gimme_user_fail)
 
 
 @bae.slash_command(name="help")
 async def shea_help(self):
     """For now just check the README."""
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested help")
     await self.respond(f"There is no \"why\"")
 
 ########################################################################################################################

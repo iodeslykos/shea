@@ -47,19 +47,20 @@ logger.addHandler(file_handler)
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.messages = True
 bae = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 
 @bae.event
-async def on_ready(self):
-    print(f"Logged in as {self.user} (ID: {self.user.id}")
-    logger.info("Logged in as {self.user} (ID: {self.user.id}")
+async def on_ready():
+    print(f"Logged in as {bae.user} (ID: {bae.user.id}")
+    logger.info(f"Logged in as {bae.user} (ID: {bae.user.id}")
 
 
 @bae.event
-async def on_error(self):
-    print(f"%s", self)
-    logger.fatal("%s", self)
+async def on_error():
+    print(f"%s", bae)
+    logger.fatal("%s", bae)
     exit(1)
 
 
@@ -79,7 +80,7 @@ async def spaghetti_wolf(self):
 
 @bae.command(name="ping")
 async def ping(self):
-    await self.send("Received ping from {self.author.mention}. Ack?")
+    await self.send(f"Received ping from {self.author.mention}. Ack?")
 
 
 ########################################################################################################################

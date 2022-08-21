@@ -1,0 +1,27 @@
+# Typical files.
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# On root of mounted volumes.
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+
+# IDE configurations.
+*.iml
+.idea/
+.vscode/
+.project/
+
+# Virtual environments.
+.venv
+venv/
+
+# Tokens, logs, and etc.
+config.json
+logs/*.log
+out/
+

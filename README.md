@@ -29,9 +29,13 @@ Before running SHEA for the first time, create a copy of config.json.example, re
 - [ ] Film selection.
   - [ ] Create lists of submissions on a per-user basis.
     - [ ] Allow users to add, remove, and prioritize their selections.
-- [ ] Determine if user is present/allow a "raised hand" to signal participation.
+- [ ] Determine if user is present/allow a "raised hand" to signal participation. 
 - [ ] Better logging with adjustable verbosity.
-- [ ] Administrative commands and overrides. 
+- [ ] Administrative commands and overrides.
+
+### Wishlist.
+
+- Ability to query and display plot synopses, ratings, and service where films are hosted.
 
 ## License.
 

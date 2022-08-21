@@ -6,7 +6,7 @@ The simple heuristic entertainment administrator.
 
 import discord
 from discord.ext import commands
-import random
+import secrets
 from datetime import datetime as time
 from time import sleep
 import os
@@ -14,7 +14,7 @@ import sys
 import json
 import logging
 
-shea_version = "0.0.3"
+shea_version = "0.0.4"
 
 ########################################################################################################################
 # Configuration.
@@ -53,6 +53,7 @@ file_handler.setFormatter(logging.Formatter(
 logger.addHandler(file_handler)
 
 MEDIA_DIR = CONFIG['media_dir']
+
 for directory in MEDIA_DIR:
     try:
         os.makedirs(MEDIA_DIR[directory], exist_ok=True)
@@ -96,11 +97,12 @@ async def dice_roll(self, dice: int, sides: int):
     else:
         self.roll_results = []
         for i in range(dice):
-            roll_result = random.randint(1, sides)
+            # randbelow() generates a number between 0 and n, so add one.
+            roll_result = secrets.randbelow(sides) + 1
             self.roll_results.append(roll_result)
         for i in range(dice):
             await self.respond(f"Die #{i+1}: {self.roll_results[i]}")
-            sleep(0.25)
+            sleep(0.5)
 
 
 @bae.slash_command()
@@ -113,7 +115,8 @@ async def roll(self, dice: int, sides: int):
     else:
         self.roll_results = []
         for i in range(dice):
-            roll_result = random.randint(1, sides)
+            # randbelow() generates a number between 0 and n, so add one.
+            roll_result = secrets.randbelow(sides) + 1
             self.roll_results.append(roll_result)
         await self.respond(f"Rolling {dice} dice with {sides} sides for {self.author.mention}!")
         for i in range(dice):

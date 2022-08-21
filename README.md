@@ -30,7 +30,7 @@ Before running SHEA for the first time, create a copy of config.json.example, re
   - [ ] Create lists of submissions on a per-user basis.
     - [ ] Allow users to add, remove, and prioritize their selections.
 - [ ] Determine if user is present/allow a "raised hand" to signal participation.
-- [ ] Verbose debug.
+- [ ] Better logging with adjustable verbosity.
 - [ ] Administrative commands and overrides. 
 
 ## License.
@@ -39,4 +39,6 @@ The contents of this repository are covered under the MIT standard license. See 
 
 ## Issues & Contributions.
 
-Should you desire to contribute to or complain about the contents of this repository, feel free to open an Issue or submit a Pull Request. Though we cannot guarantee your satisfaction, requests for support and general praise will be accepted.
+Should you desire to contribute to or complain about the contents of this repository, feel free to open an Issue or submit a Pull Request. Additionally, we are open to the idea of expanding SHEA's functionality should any new ideas arise
+
+Though we cannot guarantee your satisfaction, all submissions will be considered.

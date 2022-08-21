@@ -158,6 +158,28 @@ async def ping(self):
     else:
         await self.respond(f"There is no \"why\", {self.author.mention}.")
 
+
+@bae.slash_command(name="gimme_user_data")
+async def gimme_user_data(self):
+    """Yummy user data."""
+    user_data = {
+        'self.author.mention': self.author.mention,
+        'self.author.id': self.author.id
+                 }
+    await self.respond("```" + json.dumps(user_data, indent=4) + "```")
+
+
+@bae.command(name="help")
+async def shea_help(self):
+    """For now just check the README."""
+    await self.respond(f"There is no \"why\"")
+
+
+@bae.slash_command(name="help")
+async def shea_help(self):
+    """For now just check the README."""
+    await self.respond(f"There is no \"why\"")
+
 ########################################################################################################################
 
 description = """

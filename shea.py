@@ -10,28 +10,31 @@ import random
 from datetime import datetime as time
 from time import sleep
 import os
+import sys
 import json
 import logging
 
 # Global variables and logging configuration.
 
-shea_version = "0.0.1"
+shea_version = "0.0.2"
 
-CONFIG_FILE = open('config.json', 'r')
-CONFIG = json.load(CONFIG_FILE)
-
-BOT_TOKEN = CONFIG['bot_token']
+try:
+    CONFIG_FILE = open('config.json', 'r')
+    CONFIG = json.load(CONFIG_FILE)
+except TypeError:
+    print(f"[ERROR] Unable to load configuration file: \'config.json\'")
+    exit(1)
 
 LOG_DATE = time.now()
 LOG_DIR = CONFIG['log_dir']
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = CONFIG['log_level']
 LOG_FILE = LOG_DATE.strftime(os.path.join(LOG_DIR, "shea-bae_%Y%m%d.log"))
 LOG_TIMESTAMP_FORMAT = CONFIG['timestamp_format']
 
 try:
     os.makedirs(LOG_DIR, exist_ok=True)
 except TypeError:
-    print("[ERROR]: Unable to create log path.")
+    print(f"[ERROR]: Unable to create log path: {LOG_DIR}")
     exit(2)
 
 logger = logging.getLogger('shea_bae')
@@ -42,6 +45,16 @@ file_handler.setLevel(LOG_LEVEL)
 file_handler.setFormatter(logging.Formatter(
     '%(asctime)s - %(name)s - :[%(levelname)s] %(message)s', datefmt=LOG_TIMESTAMP_FORMAT))
 logger.addHandler(file_handler)
+
+BOT_TOKEN = CONFIG['bot_token']
+
+MEDIA_DIR = CONFIG['media_dir']
+for directory in MEDIA_DIR:
+    try:
+        os.makedirs(MEDIA_DIR[directory], exist_ok=True)
+    except TypeError:
+        print(f"[ERROR] Unable to create media directory: {MEDIA_DIR[directory]}")
+        exit(1)
 
 
 ########################################################################################################################
@@ -69,7 +82,7 @@ async def on_error():
 async def dice_roll(self, dice: int, sides: int):
     """Rolls the dice."""
     nice_try = f"I can't do that, {self.author.mention}."
-    if dice > 25 or sides > 9999999999:
+    if dice > 25 or sides > sys.maxsize:
         await self.respond(nice_try)
         logger.warning(f"User {self.author}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
     else:
@@ -86,7 +99,7 @@ async def dice_roll(self, dice: int, sides: int):
 async def roll(self, dice: int, sides: int):
     """Roll the dice."""
     nice_try = "lol Nice try. :alien: :middle_finger:"
-    if dice > 25 or sides > 9999999999:
+    if dice > 25 or sides > sys.maxsize:
         await self.respond(nice_try)
         logger.warning(f"{self.author.mention}'s request was out of bounds: DICE: {dice}, SIDES: {sides}.")
     else:
@@ -103,19 +116,32 @@ async def roll(self, dice: int, sides: int):
 @bae.command(name="spaghetti_wolf")
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
-    logger.info(f"{self.author.mention} requested `spaghetti_wolf`")
-    await self.respond("`insert spaghetti wolf here`")
+    logger.info(f"{self.author.id} requested spaghetti_wolf")
+    try:
+        image_path = os.path.join(MEDIA_DIR['image'], "_spaghetti_wolf.png")
+        await self.send(file=discord.File(image_path))
+    except FileNotFoundError:
+        logger.warning(f"{self.author.id} requested spaghetti wolf, but it was not found!")
+        await self.respond(":spaghetti::wolf: is the best I can do.")
+    finally:
+        sleep(0.5)
 
 
 @bae.slash_command()
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
-    logger.info(f"{self.author.mention} requested `spaghetti_wolf`")
-    await self.respond(":spaghetti::wolf:")
-    await self.send("^^^ Placeholder until I learn to attach images.\nHelp?")
+    logger.info(f"{self.author.id} requested spaghetti_wolf")
+    try:
+        image_path = os.path.join(MEDIA_DIR['image'], "_spaghetti_wolf.png")
+        await self.respond(file=discord.File(image_path))
+    except FileNotFoundError:
+        logger.warning(f"{self.author.id} requested spaghetti wolf, but it was not found!")
+        await self.respond(":spaghetti::wolf: is the best I can do.")
+    finally:
+        sleep(0.5)
 
 
-@bae.command(name="pingg")
+@bae.command(name="ping")
 async def ping(self):
     """Confirm that the bot is running."""
     await self.send(f"Received ping from {self.author.mention}. Ack?")

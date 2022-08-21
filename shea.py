@@ -14,9 +14,13 @@ import sys
 import json
 import logging
 
-# Global variables and logging configuration.
+shea_version = "0.0.3"
 
-shea_version = "0.0.2"
+########################################################################################################################
+# Configuration.
+########################################################################################################################
+
+CONFIG = {}
 
 try:
     CONFIG_FILE = open('config.json', 'r')
@@ -24,6 +28,8 @@ try:
 except TypeError:
     print(f"[ERROR] Unable to load configuration file: \'config.json\'")
     exit(1)
+
+BOT_TOKEN = CONFIG['bot_token']
 
 LOG_DATE = time.now()
 LOG_DIR = CONFIG['log_dir']
@@ -46,8 +52,6 @@ file_handler.setFormatter(logging.Formatter(
     '%(asctime)s - %(name)s - :[%(levelname)s] %(message)s', datefmt=LOG_TIMESTAMP_FORMAT))
 logger.addHandler(file_handler)
 
-BOT_TOKEN = CONFIG['bot_token']
-
 MEDIA_DIR = CONFIG['media_dir']
 for directory in MEDIA_DIR:
     try:
@@ -63,6 +67,10 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.messages = True
 bae = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
+
+########################################################################################################################
+# Events and commands.
+########################################################################################################################
 
 
 @bae.event
@@ -163,16 +171,13 @@ async def ping(self):
 async def gimme_user_data(self):
     """Yummy user data."""
     user_data = {
-        'self.author.mention': self.author.mention,
-        'self.author.id': self.author.id
-                 }
+        'self': {
+            'self.author.mention': self.author.mention,
+            'self.author.id': self.author.id,
+            'self.author.name': self.author.name,
+        }
+    }
     await self.respond("```" + json.dumps(user_data, indent=4) + "```")
-
-
-@bae.command(name="help")
-async def shea_help(self):
-    """For now just check the README."""
-    await self.respond(f"There is no \"why\"")
 
 
 @bae.slash_command(name="help")
@@ -181,15 +186,8 @@ async def shea_help(self):
     await self.respond(f"There is no \"why\"")
 
 ########################################################################################################################
-
-description = """
-SHEA: The simple heuristic entertainment administrator.
-
-A Discord bot designed to help with the alignment and selection of films for the Feature Film Friday Posse of the Shea \
-Discord Guild.
-"""
-
-# Commence.
+# INIT
+########################################################################################################################
 
 try:
     bae.run(BOT_TOKEN)

@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 import random
 from datetime import datetime as time
+from time import sleep
 import os
 import json
 import logging
@@ -53,8 +54,8 @@ bae = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=inten
 
 @bae.event
 async def on_ready():
-    print(f"Logged in as {bae.user} (ID: {bae.user.id}")
-    logger.info(f"Logged in as {bae.user} (ID: {bae.user.id}")
+    print(f"Logged in as {bae.user} (ID: {bae.user.id})")
+    logger.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
 
 
 @bae.event
@@ -66,11 +67,35 @@ async def on_error():
 
 @bae.command(name="roll")
 async def dice_roll(self, n: int, x: int):
-    self.roll_results = []
-    for i in range(n - 1):
-        roll_result = random.randrange(x)
-        self.roll_results.append(roll_result)
-    await self.send(self.roll_results)
+    nice_try = f"I can't do that, {self.author.mention}."
+    if n > 25 or x > 9999999999:
+        await self.respond(nice_try)
+    else:
+        self.roll_results = []
+        for i in range(n):
+            roll_result = random.randint(1, x)
+            self.roll_results.append(roll_result)
+        for i in range(n):
+            await self.send(f"Die #{i+1}: {self.roll_results[i]}")
+            sleep(0.5)
+
+
+@bae.slash_command()
+async def roll(self, n: int, x: int):
+    nice_try = "lol Nice try. :alien: :middle_finger:"
+    if n > 25:
+        await self.respond(nice_try)
+    if x > 9999999999:
+        await self.respond(nice_try)
+    else:
+        self.roll_results = []
+        for i in range(n):
+            roll_result = random.randint(1, x)
+            self.roll_results.append(roll_result)
+        await self.respond(f"Rolling {n} dice with {x} sides for {self.author.mention}!")
+        for i in range(n):
+            await self.respond(f"Die #{i+1}: {self.roll_results[i]}")
+            sleep(0.5)
 
 
 @bae.command(name="spaghetti_wolf")
@@ -78,10 +103,26 @@ async def spaghetti_wolf(self):
     await self.send("`insert spaghetti wolf here`")
 
 
-@bae.command(name="ping")
+@bae.slash_command()
+async def spaghetti_wolf(self):
+    await self.respond(":spaghetti::wolf:")
+    await self.respond("^^^ Placeholder until I learn to attach images.")
+
+
+@bae.command(name="pingg")
 async def ping(self):
     await self.send(f"Received ping from {self.author.mention}. Ack?")
 
+
+@bae.slash_command(name="ping")
+async def ping(self):
+    i = random.randint(0, 1)
+    if i == 0:
+        await self.respond(f"Received ping from {self.author.mention}. Ack?")
+    elif i == 1:
+        await self.respond(f"Yes, I'm here {self.author.mention}.")
+    else:
+        await self.respond(f"There is no \"why\", {self.author.mention}.")
 
 ########################################################################################################################
 

@@ -1,0 +1,11 @@
+{
+  "bot_token": "XXXXXXXXXX",
+  "timestamp_format": "%Y-%m-%dT%H:%M:%S%z",
+  "log_dir": "logs",
+  "log_level": "DEBUG",
+  "media_dir": {
+    "audio": "media/audio",
+    "image": "media/images",
+    "video": "media/video"
+  }
+}

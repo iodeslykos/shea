@@ -14,7 +14,7 @@ import sys
 import json
 import logging
 
-shea_version = "0.0.5"
+shea_version = "0.0.6"
 
 ########################################################################################################################
 # Configuration.
@@ -46,12 +46,18 @@ except TypeError:
 
 logger = logging.getLogger('shea_bae')
 logger.setLevel(LOG_LEVEL)
+logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s', datefmt=LOG_TIMESTAMP_FORMAT)
 file_handler = logging.FileHandler(
     filename=LOG_FILE, encoding='utf-8', mode='a')
 file_handler.setLevel(LOG_LEVEL)
-file_handler.setFormatter(logging.Formatter(
-    '%(asctime)s [%(levelname)s] %(funcName)s: %(message)s', datefmt=LOG_TIMESTAMP_FORMAT))
+file_handler.setFormatter(logger_format)
 logger.addHandler(file_handler)
+
+if CONFIG['log_stdout']:
+    print(f"[INFO]: Enabling logging to console.")
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(logger_format)
+    logger.addHandler(stream_handler)
 
 MEDIA_DIR = CONFIG['media_dir']
 

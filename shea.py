@@ -99,8 +99,8 @@ async def dice_roll(self, dice: int, sides: int):
     """Rolls the dice."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
     nice_try = f"I can't do that, {self.author.mention}."
-    if dice > 25 or sides > sys.maxsize:
-        await self.respond(nice_try)
+    if dice > 25 or dice < 1 or sides > sys.maxsize or sides < 1:
+        await self.send(nice_try)
         logger.warning(f"User {self.author.name} (ID: {self.author.id}) requested too many dice!")
     else:
         self.roll_results = []
@@ -109,7 +109,7 @@ async def dice_roll(self, dice: int, sides: int):
             roll_result = secrets.randbelow(sides) + 1
             self.roll_results.append(roll_result)
         for i in range(dice):
-            await self.respond(f"Die #{i+1}: {self.roll_results[i]}")
+            await self.send(f"Die #{i+1}: {self.roll_results[i]}")
             sleep(0.5)
         logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
 
@@ -119,7 +119,7 @@ async def roll(self, dice: int, sides: int):
     """Roll the dice."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
     nice_try = "lol Nice try. :alien: :middle_finger:"
-    if dice > 25 or sides > sys.maxsize:
+    if dice > 25 or dice < 1 or sides > sys.maxsize or sides < 1:
         await self.respond(nice_try)
         logger.warning(f"User {self.author.name} (ID: {self.author.id}) requested too many dice!")
     else:

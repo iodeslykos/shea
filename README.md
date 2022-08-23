@@ -26,6 +26,7 @@ Before running SHEA for the first time, create a copy of config.json.example, re
 ## Features / Roadmap.
 
 - [X] Spaghetti wolf.
+- [X] Virtual environment installer for easy setup. 
 - [ ] Film selection.
   - [ ] Create lists of submissions on a per-user basis.
     - [ ] Allow users to add, remove, and prioritize their selections.

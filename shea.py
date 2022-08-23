@@ -19,7 +19,7 @@ import logging
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.9"
+BOT_VERSION = "0.0.10"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -175,9 +175,9 @@ async def ping(self):
         logger.error(f"Failed to respond to ping from {self.author.name} (ID: {self.author.id}!", ping_error)
 
 
-@bae.slash_command(name="gimme_user_data")
-async def gimme_user_data(self):
-    """Yummy user data."""
+@bae.slash_command(name="gimme_my_data")
+async def gimme_my_data(self):
+    """Request all of your yummy user data."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested their user data")
     try:
         user_data = {
@@ -188,6 +188,7 @@ async def gimme_user_data(self):
             }
         }
         await self.respond("```" + json.dumps(user_data, indent=4) + "```")
+        logger.info(f"{self.author.name} (ID: {self.author.id} was sent their user data")
     except Exception as gimme_user_fail:
         logger.error(f"{self.author.name} (ID: {self.author.id}) did not receive their user data!", gimme_user_fail)
 

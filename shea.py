@@ -15,12 +15,11 @@ import sys
 import json
 import logging
 
-
 ########################################################################################################################
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.8"
+BOT_VERSION = "0.0.9"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -31,7 +30,7 @@ Simple Heuristic Entertainment Administrator
 v{BOT_VERSION}
 """)
 
-#Commence!
+# Commence!
 
 print(f"{BOT_BANNER}")
 
@@ -69,7 +68,8 @@ try:
     print(f"[INFO]: Configuring logging.")
     logger = logging.getLogger('main')
     logger.setLevel(LOG_LEVEL)
-    logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s', datefmt=LOG_TIMESTAMP_FORMAT)
+    logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s',
+                                      datefmt=LOG_TIMESTAMP_FORMAT)
     file_handler = logging.FileHandler(
         filename=LOG_FILE, encoding='utf-8', mode='a')
     file_handler.setLevel(LOG_LEVEL)
@@ -102,8 +102,6 @@ for directory in MEDIA_DIR:
 print(f"[INFO]: Initializing SHEA as {BOT_NAME}")
 
 intents = discord.Intents.default()
-intents.message_content = True
-intents.messages = True
 bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 ########################################################################################################################

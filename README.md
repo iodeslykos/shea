@@ -39,7 +39,7 @@ Before running SHEA for the first time, create a copy of config.json.example, re
 
 ## License.
 
-The contents of this repository are covered under the MIT standard license. See [`LICENSE.md`](LICENSE.md) for details.
+The contents of this repository are covered under the MIT standard license. See [`LICENSE`](LICENSE) for details.
 
 ## Issues & Contributions.
 

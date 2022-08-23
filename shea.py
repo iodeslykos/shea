@@ -19,7 +19,7 @@ import logging
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.10"
+BOT_VERSION = "0.0.11"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -55,16 +55,6 @@ LOG_FILE = LOG_DATE.strftime(os.path.join(LOG_DIR, "shea-bae_%Y%m%d.log"))
 LOG_TIMESTAMP_FORMAT = CONFIG['timestamp_format']
 
 try:
-    if os.path.exists(LOG_DIR):
-        print(f"[INFO]: Log directory already exists: {LOG_DIR}")
-    else:
-        print(f"[INFO]: Log directory does not exist. {LOG_DIR} Creating...")
-        os.makedirs(LOG_DIR, exist_ok=True)
-except TypeError:
-    print(f"[ERROR]: Unable to create log path: {LOG_DIR}")
-    exit(2)
-
-try:
     print(f"[INFO]: Configuring logging.")
     logger = logging.getLogger('main')
     logger.setLevel(LOG_LEVEL)
@@ -82,24 +72,35 @@ try:
     logger.addHandler(stream_handler)
 except Exception as log_config_failure:
     print(f"[INFO]: Failed to configure logging.", log_config_failure)
+    exit(1)
+
+try:
+    if os.path.exists(LOG_DIR):
+        logger.info(f"Log directory already exists: {LOG_DIR}")
+    else:
+        logger.info(f"Log directory does not exist. {LOG_DIR} Creating...")
+        os.makedirs(LOG_DIR, exist_ok=True)
+except TypeError:
+    logger.info(f"Unable to create log path: {LOG_DIR}")
+    exit(2)
 
 MEDIA_DIR = CONFIG['media_dir']
 
 for directory in MEDIA_DIR:
     try:
         if os.path.exists(MEDIA_DIR[directory]):
-            print(f"[INFO]: Media directory already exists: {MEDIA_DIR[directory]}")
+            logger.info(f"Media directory already exists: {MEDIA_DIR[directory]}")
         else:
-            print(f"[INFO]: Media directory does not exist. {MEDIA_DIR[directory]} Creating...")
+            logger.info(f"Media directory does not exist. {MEDIA_DIR[directory]} Creating...")
             os.makedirs(MEDIA_DIR[directory], exist_ok=True)
     except TypeError:
-        print(f"[ERROR] Unable to create media directory: {MEDIA_DIR[directory]}")
+        logger.info(f"[ERROR] Unable to create media directory: {MEDIA_DIR[directory]}")
         exit(1)
 
 
 ########################################################################################################################
 
-print(f"[INFO]: Initializing SHEA as {BOT_NAME}")
+logger.info(f"[INFO]: Initializing SHEA as {BOT_NAME}")
 
 intents = discord.Intents.default()
 bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
@@ -111,13 +112,11 @@ bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents
 
 @bae.event
 async def on_ready():
-    print(f"[ OK ]: Logged in as {bae.user} (ID: {bae.user.id})")
     logger.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
 
 
 @bae.event
 async def on_error():
-    print(f"%s", bae)
     logger.fatal("%s", bae)
     exit(1)
 
@@ -204,7 +203,7 @@ async def explain(self):
 ########################################################################################################################
 
 try:
-    print(f"[INFO]: Attempting login to Discord.")
+    logger.info("Attempting login to Discord.")
     bae.run(BOT_TOKEN)
 except Exception as e:
     logger.fatal(e)

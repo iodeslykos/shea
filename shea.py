@@ -6,6 +6,7 @@ The simple heuristic entertainment administrator.
 
 import discord
 from discord.ext import commands
+from discord.ext import bridge
 import secrets
 from datetime import datetime as time
 from time import sleep
@@ -19,7 +20,7 @@ import logging
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.7"
+BOT_VERSION = "0.0.8"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -103,7 +104,7 @@ print(f"[INFO]: Initializing SHEA as {BOT_NAME}")
 intents = discord.Intents.default()
 intents.message_content = True
 intents.messages = True
-bae = commands.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
+bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
 ########################################################################################################################
 # Events and commands.
@@ -123,27 +124,7 @@ async def on_error():
     exit(1)
 
 
-@bae.command(name="roll")
-async def dice_roll(self, dice: int, sides: int):
-    """Rolls the dice."""
-    logger.info(f"{self.author.name} (ID: {self.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
-    nice_try = f"I can't do that, {self.author.mention}."
-    if dice > 25 or dice < 1 or sides > sys.maxsize or sides < 1:
-        await self.send(nice_try)
-        logger.warning(f"User {self.author.name} (ID: {self.author.id}) requested too many dice!")
-    else:
-        self.roll_results = []
-        for i in range(dice):
-            # randbelow() generates a number between 0 and n, so add one.
-            roll_result = secrets.randbelow(sides) + 1
-            self.roll_results.append(roll_result)
-        for i in range(dice):
-            await self.send(f"Die #{i+1}: {self.roll_results[i]}")
-            sleep(0.5)
-        logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
-
-
-@bae.slash_command()
+@bae.bridge_command()
 async def roll(self, dice: int, sides: int):
     """Roll the dice."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
@@ -164,22 +145,7 @@ async def roll(self, dice: int, sides: int):
             sleep(0.5)
 
 
-@bae.command(name="spaghetti_wolf")
-async def spaghetti_wolf(self):
-    """Receive a spaghetti wolf."""
-    logger.info(f"{self.author.name} (ID: {self.author.id}) requested spaghetti_wolf")
-    try:
-        image_path = os.path.join(MEDIA_DIR['image'], "_spaghetti_wolf.png")
-        await self.send(file=discord.File(image_path))
-        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf")
-    except FileNotFoundError:
-        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found!")
-        await self.respond(":spaghetti::wolf: is the best I can do.")
-    finally:
-        sleep(0.5)
-
-
-@bae.slash_command()
+@bae.bridge_command()
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested spaghetti_wolf")
@@ -194,18 +160,7 @@ async def spaghetti_wolf(self):
         sleep(0.5)
 
 
-@bae.command(name="ping")
-async def ping(self):
-    """Confirm that the bot is running."""
-    logger.info(f"{self.author.name} (ID: {self.author.id}) sent a ping request")
-    try:
-        await self.send(f"Received ping from {self.author.mention}. Ack?")
-        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a reply.")
-    except Exception as ping_error:
-        logger.error(f"Failed to respond to ping from {self.author.name} (ID: {self.author.id}!", ping_error)
-
-
-@bae.slash_command(name="ping")
+@bae.bridge_command()
 async def ping(self):
     f"""Confirm that the bot is running."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) sent a ping request")
@@ -239,11 +194,11 @@ async def gimme_user_data(self):
         logger.error(f"{self.author.name} (ID: {self.author.id}) did not receive their user data!", gimme_user_fail)
 
 
-@bae.slash_command(name="help")
-async def shea_help(self):
+@bae.bridge_command()
+async def explain(self):
     """For now just check the README."""
-    logger.info(f"{self.author.name} (ID: {self.author.id}) requested help")
-    await self.respond(f"There is no \"why\"")
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested an explanation")
+    await self.respond(f"There is no \"why\".")
 
 ########################################################################################################################
 # INIT

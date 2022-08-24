@@ -19,7 +19,7 @@ import logging
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.11"
+BOT_VERSION = "0.0.12"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -159,7 +159,7 @@ async def spaghetti_wolf(self):
 
 @bae.bridge_command()
 async def ping(self):
-    f"""Confirm that the bot is running."""
+    """Confirm that the bot is running."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) sent a ping request")
     try:
         i = secrets.randbelow(3)

@@ -32,6 +32,8 @@ v{BOT_VERSION}
 
 # Commence!
 
+global INIT_TIME
+
 print(f"{BOT_BANNER}")
 
 CONFIG = {}
@@ -112,6 +114,8 @@ bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents
 
 @bae.event
 async def on_ready():
+    global INIT_TIME
+    INIT_TIME = time.now()
     logger.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
 
 
@@ -164,12 +168,12 @@ async def ping(self):
     try:
         i = secrets.randbelow(3)
         if i == 0:
-            await self.respond(f"Received ping from {self.author.mention}. Ack?")
+            await self.respond(f"Received ping from {self.author.mention}. Ack? (Been alive since: {INIT_TIME})")
         elif i == 1:
-            await self.respond(f"Yes, I'm here. Thanks for asking, {self.author.mention}.")
+            await self.respond(f"Yes, I'm here. Thanks for asking, {self.author.mention}. (Been alive since: {INIT_TIME})")
         else:
-            await self.respond(f"There is no \"why\", {self.author.mention}.")
-        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a reply.")
+            await self.respond(f"There is no \"why\", {self.author.mention}. (Been alive since: {INIT_TIME})")
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a reply with uptime. (Been alive since: {INIT_TIME})")
     except Exception as ping_error:
         logger.error(f"Failed to respond to ping from {self.author.name} (ID: {self.author.id}!", ping_error)
 

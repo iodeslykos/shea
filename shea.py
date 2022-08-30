@@ -19,7 +19,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.16"
+BOT_VERSION = "0.0.17"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -102,7 +102,7 @@ for directory in MEDIA_DIR:
 
 ########################################################################################################################
 
-logger.info(f"[INFO]: Initializing SHEA as {BOT_NAME}")
+logger.info(f"Initializing SHEA as {BOT_NAME}")
 
 intents = discord.Intents.default()
 bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
@@ -117,24 +117,26 @@ async def on_ready():
     global INIT_TIME
     INIT_TIME = time.utcnow()
     logger.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
-    # Tell everyone that you're online, SHEA!
+    # Tell everyone that you're online, SHEA! Only sends to DEBUG channels.
     announcements_file = 'media/text/on-ready-announcements.txt'
-    try:
-        prompts = open(announcements_file, 'r').read().splitlines()
-        prompt = secrets.choice(prompts)
+    if CONFIG['startup_message'].lower() == 'true':
         try:
-            for guild in CONFIG['discord_guilds']:
-                debug_channels = CONFIG['discord_guilds'][guild]['channels']['debug']
-                guild_id = CONFIG['discord_guilds'][guild]['id']
-                for debug_channel in debug_channels:
-                    logger.info(f"Announcing activation in guild {guild} (ID: {guild_id}, CHANNEL: {debug_channel}): "
-                                f"\"{prompt}\"")
-                    await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt}")
-        except Exception as announce_error:
-            logger.error(f"Failed to announce activation!", announce_error)
-    except FileNotFoundError:
-        logger.error(f"{announcements_file} not found!")
-
+            prompts = open(announcements_file, 'r').read().splitlines()
+            prompt = secrets.choice(prompts)
+            try:
+                for guild in CONFIG['discord_guilds']:
+                    debug_channels = CONFIG['discord_guilds'][guild]['channels']['debug']
+                    guild_id = CONFIG['discord_guilds'][guild]['id']
+                    for debug_channel in debug_channels:
+                        logger.info(f"Announcing activation in guild {guild} (ID: {guild_id}, CHANNEL: "
+                                    f"{debug_channel}): \"{prompt}\"")
+                        await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt}")
+            except Exception as announce_error:
+                logger.error(f"Failed to announce activation!", announce_error)
+        except FileNotFoundError:
+            logger.error(f"{announcements_file} not found!")
+    else:
+        logger.info(f"Startup message disabled.")
 
 
 @bae.event
@@ -227,6 +229,20 @@ async def gimme_my_data(self):
     except Exception as gimme_user_fail:
         logger.error(f"{self.author.name} (ID: {self.author.id}) did not receive their user data!", gimme_user_fail)
 
+@bae.bridge_command()
+async def steve(self):
+    """Steve's stray stuff."""
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested some Steve")
+    image_path = os.path.join(MEDIA_DIR['audio'], "steve")
+    file = secrets.choice(os.listdir(image_path))
+    file_path = os.path.join(image_path, file)
+    try:
+        await self.respond(file=discord.File(file_path))
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent some Steve: {file}")
+    except FileNotFoundError:
+        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested some Steve, but it was not found!"
+                       f"{file_path}")
+        await self.respond(":Steve: is the best I can do.")
 
 @bae.bridge_command()
 async def explain(self):

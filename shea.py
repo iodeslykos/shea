@@ -9,7 +9,6 @@ from discord.ext import commands
 from discord.ext import bridge
 import secrets
 from datetime import datetime as time
-from time import sleep
 import os
 import sys
 import json
@@ -154,7 +153,6 @@ async def roll(self, dice: int, sides: int):
             self.roll_results.append(roll_result)
         logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
         await self.respond(f"{self.roll_results}")
-        sleep(0.5)
 
 
 @bae.bridge_command()
@@ -171,8 +169,6 @@ async def spaghetti_wolf(self):
         logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found! \
                         {file_path}")
         await self.respond(":spaghetti::wolf: is the best I can do.")
-    finally:
-        sleep(0.5)
 
 
 @bae.bridge_command()

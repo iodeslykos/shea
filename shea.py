@@ -20,7 +20,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.12"
+BOT_VERSION = "0.0.14"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -57,9 +57,11 @@ LOG_LEVEL = CONFIG['log_level']
 LOG_FILE = LOG_DATE.strftime(os.path.join(LOG_DIR, "shea-bae_%Y%m%d.log"))
 LOG_TIMESTAMP_FORMAT = CONFIG['timestamp_format']
 
+
+logger = logging.getLogger('main')
+
 try:
     print(f"[INFO]: Configuring logging.")
-    logger = logging.getLogger('main')
     logger.setLevel(LOG_LEVEL)
     logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s',
                                       datefmt=LOG_TIMESTAMP_FORMAT)

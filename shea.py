@@ -19,7 +19,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.15"
+BOT_VERSION = "0.0.16"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -133,7 +133,7 @@ async def on_ready():
             try:
                 logger.info(f"Announcing activation in guild {guild} (ID: {guild_id}, CHANNEL: {debug_channel}): "
                             f"\"{prompt}\"")
-                await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}\n{INIT_TIME}Z```\n{prompt}")
+                await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt}")
             except Exception as announce_error:
                 logger.error(f"Failed to announce activation!", announce_error)
 

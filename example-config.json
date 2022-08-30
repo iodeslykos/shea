@@ -3,6 +3,7 @@
   "bot_name": "SHEA [Bae]",
   "timestamp_format": "%Y-%m-%dT%H:%M:%S%z",
   "timezone": "utc",
+  "startup_message": "True",
   "log_stdout": "True",
   "log_dir": "logs",
   "log_level": "DEBUG",

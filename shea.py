@@ -14,6 +14,7 @@ import os
 import sys
 import json
 import logging
+import views
 
 ########################################################################################################################
 # Configuration.
@@ -125,6 +126,15 @@ async def on_error():
     exit(1)
 
 
+@bae.slash_command()
+async def gimme_the_buttons(self):
+    """Provide the buttons. A test of buttons."""
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested some buttons!")
+    func_view = views.GeneralResponseButtons()
+    func_view.add_item(views.ButtonLinks.github)
+    await self.respond("I provide for thee many buttons!", view=func_view, ephemeral=True)
+
+
 @bae.bridge_command()
 async def roll(self, dice: int, sides: int):
     """Roll the dice."""
@@ -142,7 +152,7 @@ async def roll(self, dice: int, sides: int):
             self.roll_results.append(roll_result)
         logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
         for i in range(dice):
-            await self.respond(f"Die #{i+1}: {self.roll_results[i]}")
+            await self.respond(f"Die #{i + 1}: {self.roll_results[i]}")
             sleep(0.5)
 
 
@@ -168,19 +178,22 @@ async def ping(self):
     try:
         i = secrets.randbelow(3)
         if i == 0:
-            await self.respond(f"Received ping from {self.author.mention}. Ack? (Been alive since: {INIT_TIME})")
+            await self.respond(
+                f"Received ping from {self.author.mention}. Ack? (Been alive since: {INIT_TIME})")
         elif i == 1:
-            await self.respond(f"Yes, I'm here. Thanks for asking, {self.author.mention}. (Been alive since: {INIT_TIME})")
+            await self.respond(
+                f"Yes, I'm here. Thanks for asking, {self.author.mention}. (Been alive since: {INIT_TIME})")
         else:
             await self.respond(f"There is no \"why\", {self.author.mention}. (Been alive since: {INIT_TIME})")
-        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a reply with uptime. (Been alive since: {INIT_TIME})")
+        logger.debug(
+            f"{self.author.name} (ID: {self.author.id}) was sent a reply with uptime. (Been alive since: {INIT_TIME})")
     except Exception as ping_error:
         logger.error(f"Failed to respond to ping from {self.author.name} (ID: {self.author.id}!", ping_error)
 
 
 @bae.slash_command(name="gimme_my_data")
 async def gimme_my_data(self):
-    """Request all of your yummy user data."""
+    """Request all of your yummy user data. Currently doesn't provide much. Sorry!"""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested their user data")
     try:
         user_data = {
@@ -190,8 +203,8 @@ async def gimme_my_data(self):
                 'self.author.name': self.author.name,
             }
         }
-        await self.respond("```" + json.dumps(user_data, indent=4) + "```")
-        logger.info(f"{self.author.name} (ID: {self.author.id} was sent their user data")
+        await self.respond("```" + json.dumps(user_data, indent=4) + "```", ephemeral=True)
+        logger.info(f"{self.author.name} (ID: {self.author.id}) was sent their user data")
     except Exception as gimme_user_fail:
         logger.error(f"{self.author.name} (ID: {self.author.id}) did not receive their user data!", gimme_user_fail)
 
@@ -201,6 +214,7 @@ async def explain(self):
     """For now just check the README."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested an explanation")
     await self.respond(f"There is no \"why\".")
+
 
 ########################################################################################################################
 # INIT

@@ -19,7 +19,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.14"
+BOT_VERSION = "0.0.15"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -55,7 +55,6 @@ LOG_DIR = CONFIG['log_dir']
 LOG_LEVEL = CONFIG['log_level']
 LOG_FILE = LOG_DATE.strftime(os.path.join(LOG_DIR, "shea-bae_%Y%m%d.log"))
 LOG_TIMESTAMP_FORMAT = CONFIG['timestamp_format']
-
 
 logger = logging.getLogger('main')
 
@@ -101,7 +100,6 @@ for directory in MEDIA_DIR:
         logger.info(f"[ERROR] Unable to create media directory: {MEDIA_DIR[directory]}")
         exit(1)
 
-
 ########################################################################################################################
 
 logger.info(f"[INFO]: Initializing SHEA as {BOT_NAME}")
@@ -119,6 +117,25 @@ async def on_ready():
     global INIT_TIME
     INIT_TIME = time.utcnow()
     logger.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
+    # Tell everyone that you're online, SHEA!
+    announcements_file = 'media/text/on-ready-announcements.txt'
+    try:
+        prompts = open(announcements_file, 'r').read().splitlines()
+        prompt = secrets.choice(prompts)
+    except FileNotFoundError:
+        logger.error(f"{announcements_file} not found! Using default message.")
+        prompt = f"..."
+
+    for guild in CONFIG['discord_guilds']:
+        debug_channels = CONFIG['discord_guilds'][guild]['channels']['debug']
+        guild_id = CONFIG['discord_guilds'][guild]['id']
+        for debug_channel in debug_channels:
+            try:
+                logger.info(f"Announcing activation in guild {guild} (ID: {guild_id}, CHANNEL: {debug_channel}): "
+                            f"\"{prompt}\"")
+                await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}\n{INIT_TIME}Z```\n{prompt}")
+            except Exception as announce_error:
+                logger.error(f"Failed to announce activation!", announce_error)
 
 
 @bae.event
@@ -164,10 +181,10 @@ async def spaghetti_wolf(self):
     file_path = os.path.join(image_path, file)
     try:
         await self.respond(file=discord.File(file_path))
-        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf {file_path}")
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf: {file}")
     except FileNotFoundError:
-        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found! \
-                        {file_path}")
+        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found!"
+                       f"{file_path}")
         await self.respond(":spaghetti::wolf: is the best I can do.")
 
 

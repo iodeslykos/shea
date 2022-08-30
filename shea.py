@@ -122,20 +122,19 @@ async def on_ready():
     try:
         prompts = open(announcements_file, 'r').read().splitlines()
         prompt = secrets.choice(prompts)
+        try:
+            for guild in CONFIG['discord_guilds']:
+                debug_channels = CONFIG['discord_guilds'][guild]['channels']['debug']
+                guild_id = CONFIG['discord_guilds'][guild]['id']
+                for debug_channel in debug_channels:
+                    logger.info(f"Announcing activation in guild {guild} (ID: {guild_id}, CHANNEL: {debug_channel}): "
+                                f"\"{prompt}\"")
+                    await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt}")
+        except Exception as announce_error:
+            logger.error(f"Failed to announce activation!", announce_error)
     except FileNotFoundError:
-        logger.error(f"{announcements_file} not found! Using default message.")
-        prompt = f"..."
+        logger.error(f"{announcements_file} not found!")
 
-    for guild in CONFIG['discord_guilds']:
-        debug_channels = CONFIG['discord_guilds'][guild]['channels']['debug']
-        guild_id = CONFIG['discord_guilds'][guild]['id']
-        for debug_channel in debug_channels:
-            try:
-                logger.info(f"Announcing activation in guild {guild} (ID: {guild_id}, CHANNEL: {debug_channel}): "
-                            f"\"{prompt}\"")
-                await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt}")
-            except Exception as announce_error:
-                logger.error(f"Failed to announce activation!", announce_error)
 
 
 @bae.event

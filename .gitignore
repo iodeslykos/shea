@@ -16,9 +16,10 @@
 .vscode/
 .project/
 
-# Virtual environments.
+# Python.
 .venv
 venv/
+__pycache__/
 
 # Tokens, logs, and etc.
 config.json

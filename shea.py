@@ -151,9 +151,8 @@ async def roll(self, dice: int, sides: int):
             roll_result = secrets.randbelow(sides) + 1
             self.roll_results.append(roll_result)
         logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
-        for i in range(dice):
-            await self.respond(f"Die #{i + 1}: {self.roll_results[i]}")
-            sleep(0.5)
+        await self.respond(f"{self.roll_results}")
+        sleep(0.5)
 
 
 @bae.bridge_command()
@@ -165,7 +164,7 @@ async def spaghetti_wolf(self):
     file_path = os.path.join(image_path, file)
     try:
         await self.respond(file=discord.File(file_path))
-        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf")
+        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf {file_path}")
     except FileNotFoundError:
         logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found! \
                         {file_path}")

@@ -160,12 +160,15 @@ async def roll(self, dice: int, sides: int):
 async def spaghetti_wolf(self):
     """Receive a spaghetti wolf."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested spaghetti_wolf")
+    image_path = os.path.join(MEDIA_DIR['image'], "spaghetti-wolf")
+    file = secrets.choice(os.listdir(image_path))
+    file_path = os.path.join(image_path, file)
     try:
-        image_path = os.path.join(MEDIA_DIR['image'], "_spaghetti_wolf.png")
-        await self.respond(file=discord.File(image_path))
+        await self.respond(file=discord.File(file_path))
         logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf")
     except FileNotFoundError:
-        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found!")
+        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found! \
+                        {file_path}")
         await self.respond(":spaghetti::wolf: is the best I can do.")
     finally:
         sleep(0.5)

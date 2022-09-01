@@ -1,7 +1,7 @@
 {
   "bot_token": "0123456789",
-  "bot_name": "SHEA [Bae]",
-  "timestamp_format": "%Y-%m-%dT%H:%M:%S%z",
+  "bot_name": "bot name",
+  "timestamp_format": "%Y-%m-%d %H:%M:%S%z",
   "timezone": "utc",
   "startup_message": "True",
   "log_stdout": "True",
@@ -15,31 +15,35 @@
   },
   "data_dir": "data",
   "discord_guilds": {
-    "guild name": {
+    "example guild": {
       "id": "0123456789",
-      "users": [
-        {
-          "admin": [
-            "0123456789"
-          ]
-        }
-      ],
-      "channels": [
-        {
-          "admin": [
-            "0123456789"
-          ],
-          "debug": [
-            "0123456789"
-          ],
-          "public": [
-            "0123456789"
-          ],
-          "private": [
-            "0123456789"
-          ]
-        }
-      ]
+      "users": {
+        "admin": [
+          "0123456789"
+        ]
+      },
+      "channels": {
+        "admin": [
+          "None"
+        ],
+        "debug": [
+          "0123456789"
+        ],
+        "public": [
+          "0123456789"
+        ],
+        "private": [
+          "0123456789"
+        ]
+      }
     }
-  }
+  },
+  "intents": [
+    {
+      "messages": "True"
+    },
+    {
+      "message_content": "True"
+    }
+  ]
 }

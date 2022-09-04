@@ -21,7 +21,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.18"
+BOT_VERSION = "0.0.19"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -121,7 +121,7 @@ async def on_ready():
     INIT_TIME = time.utcnow()
     logger.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
     # Tell everyone that you're online, SHEA! Only sends to DEBUG channels.
-    await startup_message(bae.user)
+    await startup_prompt(bae.user)
 
 
 @bae.event
@@ -242,18 +242,18 @@ async def explain(self):
 # Other functions.
 ########################################################################################################################
 
-async def startup_message(bot_name):
+async def startup_prompt(bot_name):
     """Send message to selected channel to announce ready."""
     startup_messages_file = 'media/text/startup-messages.txt'
     if os.path.exists(startup_messages_file):
-        if 'startup_message' in CONFIG:
-            if CONFIG['startup_message'].lower() != 'false':
+        if 'startup_prompt' in CONFIG:
+            if CONFIG['startup_prompt'].lower() != 'false':
                 try:
                     prompts = open(startup_messages_file, 'r').read().splitlines()
                     prompt = secrets.choice(prompts)
                 except FileNotFoundError:
-                    logger.error(f"{startup_messages_file} not found! Using default message.")
-                    prompt = "Nothing special to say today!"
+                    logger.warning(f"{startup_messages_file} not found! Using default message.")
+                    prompt = f"Initialization of {bot_name} complete."
                 try:
                     for guild in CONFIG['discord_guilds']:
                         debug_channels = CONFIG['discord_guilds'][guild]['channels']['debug']
@@ -261,13 +261,13 @@ async def startup_message(bot_name):
                         for debug_channel in debug_channels:
                             logger.info(f"Announcing activation in guild \"{guild}\" (ID: {guild_id}, CHANNEL: "
                                         f"{debug_channel}): \"{prompt}\"")
-                            await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt}")
+                            await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt} + bot_name")
                 except Exception as announce_error:
                     logger.error(f"Failed to announce activation!", announce_error)
             else:
                 logger.info(f"Startup message disabled.")
         else:
-            logger.warning(f"\'startup_message\' not present in {CONFIG_PATH}")
+            logger.warning(f"\'startup_prompt\' not present in {CONFIG_PATH}")
     else:
         logger.warning(f"File {startup_messages_file} could not be found!")
 

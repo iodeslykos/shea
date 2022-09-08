@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.20"
+BOT_VERSION = "0.0.21"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -52,7 +52,11 @@ except FileNotFoundError:
 
 BOT_TOKEN = CONFIG['bot_token']
 BOT_NAME = CONFIG['bot_name']
-BOT_OWNER = CONFIG['bot_owner']
+
+if 'bot_owner' in CONFIG:
+    BOT_OWNER = CONFIG['bot_owner']
+else:
+    BOT_OWNER = None
 
 LOG_DATE = time.now()
 LOG_DIR = CONFIG['log_dir']
@@ -246,7 +250,7 @@ async def explain(self):
 
 @bae.slash_command()
 async def shutdown(self):
-    """ADMINISTRATOR ONLY: Request remote shutdown."""
+    """BOT OWNER ONLY: Request remote shutdown."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested remote shutdown.")
     if str(self.author.id) == BOT_OWNER:
         logger.info(f"{self.author.name} (ID: {self.author.id}) is 'bot_owner'. Shutting down.")
@@ -295,7 +299,8 @@ async def update(self):
         await self.send(f"Attempting to fetch from origin: `{git_remote}:{git_branch}`")
         git_remote.fetch()
     except Exception as git_fetch_error:
-        logger.info(f"Failed to fetch from git!", git_fetch_error)
+        logger.info(f"Failed to fetch from origin!", git_fetch_error)
+        await self.send(f"Failed to fetch from origin!", git_fetch_error)
     try:
         logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
         await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")

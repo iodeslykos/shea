@@ -313,8 +313,8 @@ async def update(self):
             await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
             git_update_success = True
         else:
-            logger.info(f"SHEA {BOT_VERSION} (`{git_hash_current`}) is current. No update required.")
-            await self.send(f"SHEA {BOT_VERSION} (`{git_hash_current`}) is current. No update required.")
+            logger.info(f"SHEA {BOT_VERSION} (`{git_hash_current}`) is current. No update required.")
+            await self.send(f"SHEA {BOT_VERSION} (`{git_hash_current}`) is current. No update required.")
     except Exception as git_update_error:
         await self.respond(f"Error during update! Aborting! {git_update_error}")
         logger.error(f"Error during update! Aborting!", git_update_error)

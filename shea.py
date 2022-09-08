@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.27"
+BOT_VERSION = "0.0.28"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -150,7 +150,7 @@ async def roll(self, dice: int, sides: int):
     """Roll the dice."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
     nice_try = "lol Nice try. :alien: :middle_finger:"
-    if dice > 25 or dice < 1 or sides > sys.maxsize or sides < 1:
+    if dice > 99 or dice < 1 or sides > sys.maxsize or sides < 2:
         await self.respond(nice_try)
         logger.warning(f"User {self.author.name} (ID: {self.author.id}) requested too many dice!")
     else:
@@ -161,7 +161,11 @@ async def roll(self, dice: int, sides: int):
             roll_result = secrets.randbelow(sides) + 1
             self.roll_results.append(roll_result)
         logger.debug(f"User {self.author.name} (ID: {self.author.id}) got {self.roll_results}")
-        await self.respond(f"{self.roll_results}")
+        # Should probably create an embed to display dice rolls.
+        roll_output = "Was Lady Luck on your side?\n"
+        for i in range(dice):
+            roll_output = roll_output + f"\nRoll {i}: {roll_output[i]}"
+        await self.respond(f"{roll_output}")
 
 
 @bae.bridge_command()

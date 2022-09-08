@@ -13,6 +13,7 @@ import os
 import sys
 import json
 import logging
+import git
 
 # SHEA modules.
 import views
@@ -21,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.19"
+BOT_VERSION = "0.0.20"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -51,6 +52,7 @@ except FileNotFoundError:
 
 BOT_TOKEN = CONFIG['bot_token']
 BOT_NAME = CONFIG['bot_name']
+BOT_OWNER = CONFIG['bot_owner']
 
 LOG_DATE = time.now()
 LOG_DIR = CONFIG['log_dir']
@@ -81,7 +83,7 @@ except Exception as log_config_failure:
 
 try:
     if os.path.exists(LOG_DIR):
-        logger.info(f"Log directory already exists: {LOG_DIR}")
+        logger.debug(f"Log directory already exists: {LOG_DIR}")
     else:
         logger.info(f"Log directory does not exist. {LOG_DIR} Creating...")
         os.makedirs(LOG_DIR, exist_ok=True)
@@ -94,7 +96,7 @@ MEDIA_DIR = CONFIG['media_dir']
 for directory in MEDIA_DIR:
     try:
         if os.path.exists(MEDIA_DIR[directory]):
-            logger.info(f"Media directory already exists: {MEDIA_DIR[directory]}")
+            logger.debug(f"Media directory already exists: {MEDIA_DIR[directory]}")
         else:
             logger.info(f"Media directory does not exist. {MEDIA_DIR[directory]} Creating...")
             os.makedirs(MEDIA_DIR[directory], exist_ok=True)
@@ -239,8 +241,83 @@ async def explain(self):
 
 
 ########################################################################################################################
+# Administrative commands.
+########################################################################################################################
+
+@bae.slash_command()
+async def shutdown(self):
+    """ADMINISTRATOR ONLY: Request remote shutdown."""
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested remote shutdown.")
+    if str(self.author.id) == BOT_OWNER:
+        logger.info(f"{self.author.name} (ID: {self.author.id}) is 'bot_owner'. Shutting down.")
+        await self.respond(f"Shutting down...")
+        try:
+            await bae.close()
+            print(f"{BOT_NAME} shut down gracefully.")
+        except Exception as shutdown_error:
+            logger.fatal("Failed to exit gracefully!", shutdown_error)
+            exit(1)
+    else:
+        logger.warning(f"{self.author.name} (ID: {self.author.id}) is not 'bot_owner'! Shutdown denied.")
+        await self.respond(f"I can't do that {self.author.name}.")
+
+
+@bae.slash_command()
+@commands.has_role("botmaster")
+async def restart(self):
+    """ADMINISTRATOR ONLY: Request remote restart."""
+    await self.respond(f"Attempting restart.")
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested restart.")
+    try:
+        await restart_bot(self)
+    except Exception as restart_error:
+        logger.info(f"Unable to reconnect!", restart_error)
+
+
+@bae.slash_command()
+@commands.has_role("botmaster")
+async def update(self):
+    """ADMINISTRATOR ONLY: Pull the latest version of SHEA."""
+    await self.respond(f"SHEA update requested by {self.author.name}.")
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested a SHEA update.")
+
+    git_repo = git.Repo('.')
+    git_branch = "trunk"
+
+    if 'git' in CONFIG:
+        git_repo = git.Repo(CONFIG['git']['dir'])
+        git_branch = CONFIG['git']['branch']
+
+    git_remote = git_repo.remotes['origin']
+
+    try:
+        logger.info(f"Attempting to fetch from origin: {git_remote}:{git_branch}")
+        await self.send(f"Attempting to fetch from origin: `{git_remote}:{git_branch}`")
+        git_remote.fetch()
+    except Exception as git_fetch_error:
+        logger.info(f"Failed to fetch from git!", git_fetch_error)
+    try:
+        logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
+        await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
+        git_remote.pull()
+        await self.send(f"Updated from remote successfully.")
+        await self.send(f"Restarting SHEA to apply update.")
+        restart_bot(self)
+    except Exception as git_update_error:
+        await self.respond(f"Update failed! {git_update_error}")
+        logger.error(f"Update failed!", git_update_error)
+
+
+########################################################################################################################
 # Other functions.
 ########################################################################################################################
+
+def restart_bot(self):
+    try:
+        os.execv(sys.executable, ['python3'] + sys.argv)
+    except Exception as restart_error:
+        raise restart_error
+
 
 async def startup_prompt(bot_name):
     """Send message to selected channel to announce ready."""
@@ -261,7 +338,7 @@ async def startup_prompt(bot_name):
                         for debug_channel in debug_channels:
                             logger.info(f"Announcing activation in guild \"{guild}\" (ID: {guild_id}, CHANNEL: "
                                         f"{debug_channel}): \"{prompt}\"")
-                            await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n{prompt} + bot_name")
+                            await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n\"{prompt}\"")
                 except Exception as announce_error:
                     logger.error(f"Failed to announce activation!", announce_error)
             else:

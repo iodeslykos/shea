@@ -25,4 +25,5 @@ __pycache__/
 config.json
 logs/*.log
 out/
+media/
 

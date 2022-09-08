@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.26"
+BOT_VERSION = "0.0.27"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -241,7 +241,7 @@ async def steve(self):
 async def explain(self):
     """For now just check the README."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested an explanation")
-    await self.respond(f"There is no \"why\".")
+    await self.respond(f"I am a work in progress. Currently, I am running {BOT_VERSION}, but one day hope to hit v1.0.0!")
 
 
 ########################################################################################################################
@@ -284,7 +284,7 @@ async def update(self):
 
     git_repo = git.Repo('.')
     git_branch = "trunk"
-    git_hash_current = git_repo.head.object.hexsha[0:5]
+    git_hash_current = git_repo.head.object.hexsha[0:7]
     git_update_success = False
 
     if 'git' in CONFIG:
@@ -304,8 +304,8 @@ async def update(self):
         logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
         await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
         git_remote.pull()
-        git_hash_update = git_repo.head.object.hexsha[0:5]
-        await self.send(f"Updated from `{git_hash_current} to {git_hash_update}`.")
+        git_hash_update = git_repo.head.object.hexsha[:7]
+        await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
         git_update_success = True
     except Exception as git_update_error:
         await self.respond(f"Error during update! {git_update_error}")

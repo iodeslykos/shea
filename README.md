@@ -30,8 +30,8 @@ Before running SHEA for the first time, create a copy of config.json.example, re
 - [X] Spaghetti wolf :spaghetti::wolf:.
 - [X] Virtual environment installer for easy setup. 
 - [ ] Feature Film Friday functionality.
-- [ ] Better logging with adjustable verbosity.
-- [ ] Administrative commands and overrides.
+- [ ] Better logging with adjustable verbosity and rotation.
+- [ ] Administrative commands, overrides, and remote update capability.
 - [ ] Better documentation and installation instructions.
 
 ### Wishlist.

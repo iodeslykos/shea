@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.21"
+BOT_VERSION = "0.0.22"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -287,6 +287,8 @@ async def update(self):
 
     git_repo = git.Repo('.')
     git_branch = "trunk"
+    git_hash_current = git_repo.head.object.hexsha
+    git_update_success = False
 
     if 'git' in CONFIG:
         git_repo = git.Repo(CONFIG['git']['dir'])
@@ -305,12 +307,20 @@ async def update(self):
         logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
         await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
         git_remote.pull()
-        await self.send(f"Updated from remote successfully.")
+        git_hash_update = git_repo.head.object.hexsha
+        await self.send(f"Updated from remote successfully.\n`{git_hash_current} => {git_hash_update}")
+        git_update_success = True
+    except Exception as git_update_error:
+        await self.respond(f"Error during update! {git_update_error}")
+        logger.error(f"Error during update!", git_update_error)
+
+    # Drop GitPython to avoid memory leak.
+    logger.debug(f"Dropping GitPython to avoid memory leak.")
+    git_repo.__del__()
+
+    if git_update_success is True:
         await self.send(f"Restarting SHEA to apply update.")
         restart_bot(self)
-    except Exception as git_update_error:
-        await self.respond(f"Update failed! {git_update_error}")
-        logger.error(f"Update failed!", git_update_error)
 
 
 ########################################################################################################################

@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.28"
+BOT_VERSION = "0.0.29"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -164,7 +164,7 @@ async def roll(self, dice: int, sides: int):
         # Should probably create an embed to display dice rolls.
         roll_output = "Was Lady Luck on your side?\n"
         for i in range(dice):
-            roll_output = roll_output + f"\nRoll {i}: {self.roll_results[i]}"
+            roll_output = roll_output + f"\nRoll {i+1}: {self.roll_results[i]}"
         await self.respond(f"{roll_output}")
 
 

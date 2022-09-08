@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.29"
+BOT_VERSION = "0.0.30"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -305,15 +305,19 @@ async def update(self):
         logger.info(f"Failed to fetch from origin!", git_fetch_error)
         await self.send(f"Failed to fetch from origin!", git_fetch_error)
     try:
-        logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
-        await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
-        git_remote.pull()
         git_hash_update = git_repo.head.object.hexsha[:7]
-        await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
-        git_update_success = True
+        if git_hash_current != git_hash_update:
+            logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
+            await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
+            git_remote.pull()
+            await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
+            git_update_success = True
+        else:
+            logger.info(f"Commit {git_hash_current} is current. No update required.")
+            await self.send(f"Commit `{git_hash_current}` ({BOT_VERSION} is current. No update required.")
     except Exception as git_update_error:
-        await self.respond(f"Error during update! {git_update_error}")
-        logger.error(f"Error during update!", git_update_error)
+        await self.respond(f"Error during update! Aborting! {git_update_error}")
+        logger.error(f"Error during update! Aborting!", git_update_error)
 
     # Drop GitPython to avoid memory leak.
     logger.debug(f"Dropping GitPython to avoid memory leak.")

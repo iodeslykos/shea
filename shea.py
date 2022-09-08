@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.23"
+BOT_VERSION = "0.0.25"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -287,7 +287,7 @@ async def update(self):
 
     git_repo = git.Repo('.')
     git_branch = "trunk"
-    git_hash_current = git_repo.head.object.hexsha
+    git_hash_current = git_repo.head.object.hexsha[0:5]
     git_update_success = False
 
     if 'git' in CONFIG:
@@ -307,8 +307,8 @@ async def update(self):
         logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
         await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
         git_remote.pull()
-        git_hash_update = git_repo.head.object.hexsha
-        await self.send(f"Updated from remote successfully.\n`{git_hash_current} => {git_hash_update}")
+        git_hash_update = git_repo.head.object.hexsha[0:5]
+        await self.send(f"Updated from `{git_hash_current} to {git_hash_update}`.\n")
         git_update_success = True
     except Exception as git_update_error:
         await self.respond(f"Error during update! {git_update_error}")

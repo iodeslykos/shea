@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.25"
+BOT_VERSION = "0.0.26"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -272,10 +272,7 @@ async def restart(self):
     """ADMINISTRATOR ONLY: Request remote restart."""
     await self.respond(f"Attempting restart.")
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested restart.")
-    try:
-        await restart_bot(self)
-    except Exception as restart_error:
-        logger.info(f"Unable to reconnect!", restart_error)
+    restart_bot()
 
 
 @bae.slash_command()
@@ -308,7 +305,7 @@ async def update(self):
         await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
         git_remote.pull()
         git_hash_update = git_repo.head.object.hexsha[0:5]
-        await self.send(f"Updated from `{git_hash_current} to {git_hash_update}`.\n")
+        await self.send(f"Updated from `{git_hash_current} to {git_hash_update}`.")
         git_update_success = True
     except Exception as git_update_error:
         await self.respond(f"Error during update! {git_update_error}")
@@ -320,14 +317,14 @@ async def update(self):
 
     if git_update_success is True:
         await self.send(f"Restarting SHEA to apply update.")
-        restart_bot(self)
+        restart_bot()
 
 
 ########################################################################################################################
 # Other functions.
 ########################################################################################################################
 
-def restart_bot(self):
+def restart_bot():
     try:
         os.execv(sys.executable, ['python3'] + sys.argv)
     except Exception as restart_error:

@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.31"
+BOT_VERSION = "0.0.32"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -301,15 +301,16 @@ async def update(self):
         logger.info(f"Attempting to fetch from origin: {git_remote}:{git_branch}")
         await self.send(f"Attempting to fetch from origin: `{git_remote}:{git_branch}`")
         git_remote.fetch()
+        git_remote.update()
     except Exception as git_fetch_error:
         logger.info(f"Failed to fetch from origin!", git_fetch_error)
         await self.send(f"Failed to fetch from origin!", git_fetch_error)
     try:
+        logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
+        await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
+        git_remote.pull()
         git_hash_update = git_repo.head.object.hexsha[:7]
         if git_hash_current != git_hash_update:
-            logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
-            await self.send(f"Attempting to pull from origin: `{git_remote}:{git_branch}`")
-            git_remote.pull()
             await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
             git_update_success = True
         else:

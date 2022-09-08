@@ -301,7 +301,6 @@ async def update(self):
         logger.info(f"Attempting to fetch from origin: {git_remote}:{git_branch}")
         await self.send(f"Attempting to fetch from origin: `{git_remote}:{git_branch}`")
         git_remote.fetch()
-        git_remote.update()
     except Exception as git_fetch_error:
         logger.info(f"Failed to fetch from origin!", git_fetch_error)
         await self.send(f"Failed to fetch from origin!", git_fetch_error)

@@ -164,7 +164,7 @@ async def roll(self, dice: int, sides: int):
         # Should probably create an embed to display dice rolls.
         roll_output = "Was Lady Luck on your side?\n"
         for i in range(dice):
-            roll_output = roll_output + f"\nRoll {i}: {roll_output[i]}"
+            roll_output = roll_output + f"\nRoll {i}: {self.roll_results[i]}"
         await self.respond(f"{roll_output}")
 
 

@@ -152,7 +152,7 @@ async def roll(self, dice: int, sides: int):
     nice_try = "lol Nice try. :alien: :middle_finger:"
     if dice > 99 or dice < 1 or sides > sys.maxsize or sides < 2:
         await self.respond(nice_try)
-        logger.warning(f"User {self.author.name} (ID: {self.author.id}) requested too many dice!")
+        logger.warning(f"User {self.author.name} (ID: {self.author.id}) exceeded dice roll parameters!")
     else:
         self.roll_results = []
         await self.respond(f"Rolling {dice} dice with {sides} sides for {self.author.mention}!")

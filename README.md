@@ -37,6 +37,8 @@ Before running SHEA for the first time, create a copy of config.json.example, re
 ### Wishlist.
 
 - Ability to query and display plot synopses, ratings, and a list of services where requested content is available to stream.
+- Fractal generation.
+- Return dice rolls as an image instead of text block.
 
 ## License.
 

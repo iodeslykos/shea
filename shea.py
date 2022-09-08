@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.32"
+BOT_VERSION = "0.0.33"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -288,7 +288,7 @@ async def update(self):
 
     git_repo = git.Repo('.')
     git_branch = "trunk"
-    git_hash_current = git_repo.head.object.hexsha[0:7]
+    git_hash_current = git_repo.head.object.hexsha[:7]
     git_update_success = False
 
     if 'git' in CONFIG:
@@ -313,8 +313,8 @@ async def update(self):
             await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
             git_update_success = True
         else:
-            logger.info(f"Commit {git_hash_current} is current. No update required.")
-            await self.send(f"Commit `{git_hash_current}` ({BOT_VERSION} is current. No update required.")
+            logger.info(f"SHEA {BOT_VERSION} (`{git_hash_current`}) is current. No update required.")
+            await self.send(f"SHEA {BOT_VERSION} (`{git_hash_current`}) is current. No update required.")
     except Exception as git_update_error:
         await self.respond(f"Error during update! Aborting! {git_update_error}")
         logger.error(f"Error during update! Aborting!", git_update_error)

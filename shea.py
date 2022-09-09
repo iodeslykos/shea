@@ -72,29 +72,28 @@ try:
     # Desired format: TIMESTAMP LOGLEVEL USER USER_ID FUNC_NAME?
     logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s',
                                       datefmt=LOG_TIMESTAMP_FORMAT)
+    if CONFIG['log_stdout']:
+        print(f"[INFO]: Enabling logging to console.")
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(logger_format)
+        logger.addHandler(stream_handler)
+    try:
+        if os.path.exists(LOG_DIR):
+            logger.debug(f"Log directory already exists: {LOG_DIR}")
+        else:
+            logger.info(f"Log directory does not exist. {LOG_DIR} Creating...")
+            os.makedirs(LOG_DIR, exist_ok=True)
+    except TypeError:
+        logger.info(f"Unable to create log path: {LOG_DIR}")
+        exit(2)
     file_handler = logging.FileHandler(
         filename=LOG_FILE, encoding='utf-8', mode='a')
     file_handler.setLevel(LOG_LEVEL)
     file_handler.setFormatter(logger_format)
     logger.addHandler(file_handler)
-    if CONFIG['log_stdout']:
-        print(f"[INFO]: Enabling logging to console.")
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(logger_format)
-    logger.addHandler(stream_handler)
 except Exception as log_config_failure:
     print(f"[INFO]: Failed to configure logging.", log_config_failure)
     exit(1)
-
-try:
-    if os.path.exists(LOG_DIR):
-        logger.debug(f"Log directory already exists: {LOG_DIR}")
-    else:
-        logger.info(f"Log directory does not exist. {LOG_DIR} Creating...")
-        os.makedirs(LOG_DIR, exist_ok=True)
-except TypeError:
-    logger.info(f"Unable to create log path: {LOG_DIR}")
-    exit(2)
 
 MEDIA_DIR = CONFIG['media_dir']
 

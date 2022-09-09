@@ -79,9 +79,9 @@ try:
         logger.addHandler(stream_handler)
     try:
         if os.path.exists(LOG_DIR):
-            logger.debug(f"Log directory already exists: {LOG_DIR}")
+            logger.info(f"Log directory already exists: {LOG_DIR}")
         else:
-            logger.info(f"Log directory does not exist. {LOG_DIR} Creating...")
+            logger.info(f"Log directory does not exist. Creating {LOG_DIR}")
             os.makedirs(LOG_DIR, exist_ok=True)
     except TypeError:
         logger.info(f"Unable to create log path: {LOG_DIR}")
@@ -102,10 +102,10 @@ for directory in MEDIA_DIR:
         if os.path.exists(MEDIA_DIR[directory]):
             logger.debug(f"Media directory already exists: {MEDIA_DIR[directory]}")
         else:
-            logger.info(f"Media directory does not exist. {MEDIA_DIR[directory]} Creating...")
+            logger.info(f"Media directory does not exist. Creating {MEDIA_DIR[directory]}")
             os.makedirs(MEDIA_DIR[directory], exist_ok=True)
     except TypeError:
-        logger.info(f"[ERROR] Unable to create media directory: {MEDIA_DIR[directory]}")
+        logger.error(f"Unable to create media directory: {MEDIA_DIR[directory]}")
         exit(1)
 
 ########################################################################################################################

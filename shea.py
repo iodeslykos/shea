@@ -22,7 +22,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.34"
+BOT_VERSION = "0.0.35"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -69,6 +69,7 @@ logger = logging.getLogger('main')
 try:
     print(f"[INFO]: Configuring logging.")
     logger.setLevel(LOG_LEVEL)
+    # Desired format: TIMESTAMP LOGLEVEL USER USER_ID FUNC_NAME?
     logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s',
                                       datefmt=LOG_TIMESTAMP_FORMAT)
     file_handler = logging.FileHandler(
@@ -318,10 +319,11 @@ async def update(self):
         logger.error(f"Error during update! Aborting!", git_update_error)
 
     # Drop GitPython to avoid memory leak.
-    logger.debug(f"Dropping GitPython to avoid memory leak.")
+    logger.debug(f"Closing git repository instance: {git_repo.git}.")
     git_repo.__del__()
 
     if git_update_success is True:
+        logger.info(f"Restarting SHEA to apply update.")
         await self.send(f"Restarting SHEA to apply update.")
         restart_bot()
 

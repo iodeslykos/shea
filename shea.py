@@ -245,6 +245,8 @@ async def gimme_my_data(self):
 async def steve(self):
     """Steve's stray stuff."""
     if time_lock(self, "steve", 15) is True:
+        await self.respond("You can only handle so much Steve!")
+    else:
         logger.info(f"{self.author.name} (ID: {self.author.id}) requested some Steve")
         image_path = os.path.join(MEDIA_DIR['audio'], "steve")
         file = secrets.choice(os.listdir(image_path))
@@ -256,8 +258,6 @@ async def steve(self):
             logger.warning(f"{self.author.name} (ID: {self.author.id}) requested some Steve, but it was not found!"
                            f"{file_path}")
             await self.respond(":Steve: is the best I can do.")
-    else:
-        await self.respond("You can only handle so much Steve!")
 
 
 @bae.bridge_command()

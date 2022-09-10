@@ -245,17 +245,20 @@ async def gimme_my_data(self):
 @bae.bridge_command()
 async def steve(self):
     """Steve's stray stuff."""
-    logger.info(f"{self.author.name} (ID: {self.author.id}) requested some Steve")
-    image_path = os.path.join(MEDIA_DIR['audio'], "steve")
-    file = secrets.choice(os.listdir(image_path))
-    file_path = os.path.join(image_path, file)
-    try:
-        await self.respond(file=discord.File(file_path))
-        logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent some Steve: {file}")
-    except FileNotFoundError:
-        logger.warning(f"{self.author.name} (ID: {self.author.id}) requested some Steve, but it was not found!"
-                       f"{file_path}")
-        await self.respond(":Steve: is the best I can do.")
+    if time_lock("steve", 15) is True:
+        logger.info(f"{self.author.name} (ID: {self.author.id}) requested some Steve")
+        image_path = os.path.join(MEDIA_DIR['audio'], "steve")
+        file = secrets.choice(os.listdir(image_path))
+        file_path = os.path.join(image_path, file)
+        try:
+            await self.respond(file=discord.File(file_path))
+            logger.debug(f"{self.author.name} (ID: {self.author.id}) was sent some Steve: {file}")
+        except FileNotFoundError:
+            logger.warning(f"{self.author.name} (ID: {self.author.id}) requested some Steve, but it was not found!"
+                           f"{file_path}")
+            await self.respond(":Steve: is the best I can do.")
+    else:
+        await self.send("You can only handle so much Steve!")
 
 
 @bae.bridge_command()

@@ -23,7 +23,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.38"
+BOT_VERSION = "0.0.39"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -278,6 +278,10 @@ async def clear_locks(self):
     """ADMINISTRATOR ONLY: Clear all function locks."""
     await self.respond(f"Clearing function locks.")
     lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
+    with open(lock_file_path, 'r') as lock_file:
+        lock_data = json.dumps(lock_file, indent=2)
+        await self.respond(f"```{lock_data}```", ephemeral=True)
+        lock_file.close()
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested clearing function locks: {lock_file_path}")
     try:
         os.remove(lock_file_path)
@@ -347,7 +351,7 @@ async def update(self):
                 await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
                 git_update_success = True
             else:
-                logger.info(f"SHEA `v{BOT_VERSION}@`{git_hash_current}` is current. No update required.")
+                logger.info(f"SHEA `v{BOT_VERSION}@{git_hash_current}` is current. No update required.")
                 await self.send(f"SHEA `v{BOT_VERSION}@{git_hash_current}` is current. No update required.")
         except Exception as git_update_error:
             await self.respond(f"Error during update! Aborting! {git_update_error}")
@@ -405,7 +409,7 @@ async def startup_prompt(bot_name):
         logger.warning(f"File {startup_messages_file} could not be found!")
 
 
-def time_lock(self, function_name, delay_in_seconds):
+def time_lock(self, function_name, delay_in_seconds: int):
     time_locked = False
     lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
     time_now = time.now()

@@ -395,28 +395,35 @@ async def startup_prompt(bot_name):
 
 def time_lock(function_name, delay_in_seconds):
     time_locked = False
-    lock_file_path = os.path.join(DATA_DIR, '.lock_file')
+    lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
     time_now = time.now()
+
+    lock_init_dict = {function_name: {"last_run": time_now}}
 
     # Attempt to open lock file.
     if os.path.isfile(lock_file_path) is True:
         logger.debug(f"Lock file found: {lock_file_path}")
-        with open(lock_file_path, 'r+') as lock_file:
+        with open(lock_file_path, 'r') as lock_file:
             lock_data = json.load(lock_file)
+        if function_name in lock_data:
             time_run = time.fromisoformat(lock_data[function_name]['last_run'])
             time_delta = time_now - time_run
-        if time_delta > timedelta(seconds=delay_in_seconds):
-            with open(lock_file_path, 'w') as lock_file:
+            if time_delta > timedelta(seconds=delay_in_seconds):
                 logging.debug(f"Time since last run of {function_name} is > {delay_in_seconds}. Running.")
                 lock_data[function_name]["last_run"] = time_now
-                json.dump(lock_data, lock_file, indent=2, default=str)
+                with open(lock_file_path, 'w') as lock_file:
+                    json.dump(lock_data, lock_file, indent=2, default=str)
+            else:
+                time_locked = True
+                logging.debug(f"Time since last run of {function_name} is < {delay_in_seconds}. Not running.")
         else:
-            time_locked = True
-            logging.debug(f"Time since last run of {function_name} is < {delay_in_seconds}. Not running.")
+            lock_data |= lock_init_dict
+            with open(lock_file_path, 'w') as lock_file:
+                json.dump(lock_data, lock_file, indent=2, default=str)
+
     else:
         logger.debug(f"Lock file not found. Creating: {lock_file_path}")
         lock_file = open(lock_file_path, 'x+')
-        lock_init_dict = {function_name: {"last_run": time_now}}
         json.dump(lock_init_dict, lock_file, indent=2, default=str)
 
     lock_file.close()

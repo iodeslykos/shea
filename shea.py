@@ -24,7 +24,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.36"
+BOT_VERSION = "0.0.37"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -245,7 +245,7 @@ async def gimme_my_data(self):
 @bae.bridge_command()
 async def steve(self):
     """Steve's stray stuff."""
-    if time_lock("steve", 15) is True:
+    if time_lock(self, "steve", 15) is True:
         logger.info(f"{self.author.name} (ID: {self.author.id}) requested some Steve")
         image_path = os.path.join(MEDIA_DIR['audio'], "steve")
         file = secrets.choice(os.listdir(image_path))
@@ -307,7 +307,7 @@ async def update(self):
     await self.respond(f"SHEA update requested by {self.author.name}.")
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested a SHEA update.")
 
-    if time_lock("update", 30) is True:
+    if time_lock(self, "update", 30) is True:
         await self.send("Too soon to run an update! Wait 30 seconds.")
     else:
         git_repo = git.Repo('.')
@@ -393,10 +393,12 @@ async def startup_prompt(bot_name):
         logger.warning(f"File {startup_messages_file} could not be found!")
 
 
-def time_lock(function_name, delay_in_seconds):
+def time_lock(self, function_name, delay_in_seconds):
     time_locked = False
     lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
     time_now = time.now()
+    last_user_id = self.author.id
+    last_user_name = self.author.name
 
     lock_init_dict = {function_name: {"last_run": time_now}}
 
@@ -411,6 +413,8 @@ def time_lock(function_name, delay_in_seconds):
             if time_delta > timedelta(seconds=delay_in_seconds):
                 logging.debug(f"Time since last run of {function_name} is > {delay_in_seconds}. Running.")
                 lock_data[function_name]["last_run"] = time_now
+                lock_data[function_name]["last_user_id"] = last_user_id
+                lock_data[function_name]["last_user_name"] = last_user_name
                 with open(lock_file_path, 'w') as lock_file:
                     json.dump(lock_data, lock_file, indent=2, default=str)
             else:

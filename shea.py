@@ -258,7 +258,7 @@ async def steve(self):
                            f"{file_path}")
             await self.respond(":Steve: is the best I can do.")
     else:
-        await self.send("You can only handle so much Steve!")
+        await self.respond("You can only handle so much Steve!")
 
 
 @bae.bridge_command()

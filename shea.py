@@ -3,12 +3,14 @@ S.H.E.A. (aka Bae)
 
 The simple heuristic entertainment administrator.
 """
+import datetime
 
 import discord
 from discord.ext import commands
 from discord.ext import bridge
 import secrets
 from datetime import datetime as time
+from datetime import timedelta
 import os
 import sys
 import json
@@ -22,7 +24,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.35"
+BOT_VERSION = "0.0.36"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -58,6 +60,7 @@ if 'bot_owner' in CONFIG:
 else:
     BOT_OWNER = None
 
+# Configure logging.
 LOG_DATE = time.now()
 LOG_DIR = CONFIG['log_dir']
 LOG_LEVEL = CONFIG['log_level']
@@ -95,6 +98,7 @@ except Exception as log_config_failure:
     print(f"[INFO]: Failed to configure logging.", log_config_failure)
     exit(1)
 
+# Ensure media directory is present.
 MEDIA_DIR = CONFIG['media_dir']
 
 for directory in MEDIA_DIR:
@@ -107,6 +111,19 @@ for directory in MEDIA_DIR:
     except TypeError:
         logger.error(f"Unable to create media directory: {MEDIA_DIR[directory]}")
         exit(1)
+
+# Ensure data directory is present.
+DATA_DIR = CONFIG['data_dir']
+
+try:
+    if os.path.exists(DATA_DIR):
+        logger.debug(f"Data directory already exists: {DATA_DIR}")
+    else:
+        logger.info(f"Data directory does not exist. Creating {DATA_DIR}")
+        os.makedirs(DATA_DIR, exist_ok=True)
+except TypeError:
+    logger.error(f"Unable to create data directory: {DATA_DIR}")
+    exit(1)
 
 ########################################################################################################################
 
@@ -164,7 +181,7 @@ async def roll(self, dice: int, sides: int):
         # Should probably create an embed to display dice rolls.
         roll_output = "Was Lady Luck on your side?\n"
         for i in range(dice):
-            roll_output = roll_output + f"\nRoll {i+1}: {self.roll_results[i]}"
+            roll_output = roll_output + f"\nRoll {i + 1}: {self.roll_results[i]}"
         await self.respond(f"{roll_output}")
 
 
@@ -245,7 +262,8 @@ async def steve(self):
 async def explain(self):
     """For now just check the README."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested an explanation")
-    await self.respond(f"I am a work in progress. Currently, I am running {BOT_VERSION}, but one day hope to hit v1.0.0!")
+    await self.respond(
+        f"I am a work in progress. Currently, I am running `v{BOT_VERSION}`, but one day hope to hit v1.0.0!")
 
 
 ########################################################################################################################
@@ -286,50 +304,54 @@ async def update(self):
     await self.respond(f"SHEA update requested by {self.author.name}.")
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested a SHEA update.")
 
-    git_repo = git.Repo('.')
-    git_branch = "trunk"
-    git_hash_current = git_repo.head.object.hexsha[:7]
-    git_update_success = False
+    if time_lock("update", 30) is True:
+        await self.send("Too soon to run an update! Wait 30 seconds.")
+    else:
+        git_repo = git.Repo('.')
+        git_branch = "trunk"
+        git_hash_current = git_repo.head.object.hexsha[:7]
+        git_update_success = False
 
-    if 'git' in CONFIG:
-        git_repo = git.Repo(CONFIG['git']['dir'])
-        git_branch = CONFIG['git']['branch']
+        if 'git' in CONFIG:
+            git_repo = git.Repo(CONFIG['git']['dir'])
+            git_branch = CONFIG['git']['branch']
 
-    git_remote = git_repo.remotes['origin']
+        git_remote = git_repo.remotes['origin']
 
-    try:
-        logger.info(f"Attempting to fetch from origin: {git_remote}:{git_branch}")
-        git_remote.fetch()
-    except Exception as git_fetch_error:
-        logger.info(f"Failed to fetch from origin!", git_fetch_error)
-        await self.send(f"Failed to fetch from origin!", git_fetch_error)
-    try:
-        logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
-        git_remote.pull()
-        git_hash_update = git_repo.head.object.hexsha[:7]
-        if git_hash_current != git_hash_update:
-            await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
-            git_update_success = True
-        else:
-            logger.info(f"SHEA v{BOT_VERSION} (`{git_hash_current}`) is current. No update required.")
-            await self.send(f"SHEA v{BOT_VERSION} (`{git_hash_current}`) is current. No update required.")
-    except Exception as git_update_error:
-        await self.respond(f"Error during update! Aborting! {git_update_error}")
-        logger.error(f"Error during update! Aborting!", git_update_error)
+        try:
+            logger.info(f"Attempting to fetch from origin: {git_remote}:{git_branch}")
+            git_remote.fetch()
+        except Exception as git_fetch_error:
+            logger.info(f"Failed to fetch from origin!", git_fetch_error)
+            await self.send(f"Failed to fetch from origin!", git_fetch_error)
+        try:
+            logger.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
+            git_remote.pull()
+            git_hash_update = git_repo.head.object.hexsha[:7]
+            if git_hash_current != git_hash_update:
+                await self.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
+                git_update_success = True
+            else:
+                logger.info(f"SHEA `v{BOT_VERSION}@`{git_hash_current}` is current. No update required.")
+                await self.send(f"SHEA `v{BOT_VERSION}@{git_hash_current}` is current. No update required.")
+        except Exception as git_update_error:
+            await self.respond(f"Error during update! Aborting! {git_update_error}")
+            logger.error(f"Error during update! Aborting!", git_update_error)
 
-    # Drop GitPython to avoid memory leak.
-    logger.debug(f"Closing git repository instance: {git_repo.git}.")
-    git_repo.__del__()
+        # Drop GitPython to avoid memory leak.
+        logger.debug(f"Closing git repository instance: {git_repo.git}.")
+        git_repo.__del__()
 
-    if git_update_success is True:
-        logger.info(f"Restarting SHEA to apply update.")
-        await self.send(f"Restarting SHEA to apply update.")
-        restart_bot()
+        if git_update_success is True:
+            logger.info(f"Restarting SHEA to apply update.")
+            await self.send(f"Restarting SHEA to apply update.")
+            restart_bot()
 
 
 ########################################################################################################################
 # Other functions.
 ########################################################################################################################
+
 
 def restart_bot():
     try:
@@ -366,6 +388,36 @@ async def startup_prompt(bot_name):
             logger.warning(f"\'startup_prompt\' not present in {CONFIG_PATH}")
     else:
         logger.warning(f"File {startup_messages_file} could not be found!")
+
+
+def time_lock(function_name, delay_in_seconds):
+    time_locked = False
+    lock_file_path = os.path.join(DATA_DIR, '.lock_file')
+    time_now = time.now()
+
+    # Attempt to open lock file.
+    if os.path.isfile(lock_file_path) is True:
+        logger.debug(f"Lock file found: {lock_file_path}")
+        with open(lock_file_path, 'r+') as lock_file:
+            lock_data = json.load(lock_file)
+            time_run = time.fromisoformat(lock_data[function_name]['last_run'])
+            time_delta = time_now - time_run
+        if time_delta > timedelta(seconds=delay_in_seconds):
+            with open(lock_file_path, 'w') as lock_file:
+                logging.debug(f"Time since last run of {function_name} is > {delay_in_seconds}. Running.")
+                lock_data[function_name]["last_run"] = time_now
+                json.dump(lock_data, lock_file, indent=2, default=str)
+        else:
+            time_locked = True
+            logging.debug(f"Time since last run of {function_name} is < {delay_in_seconds}. Not running.")
+    else:
+        logger.debug(f"Lock file not found. Creating: {lock_file_path}")
+        lock_file = open(lock_file_path, 'x+')
+        lock_init_dict = {function_name: {"last_run": time_now}}
+        json.dump(lock_init_dict, lock_file, indent=2, default=str)
+
+    lock_file.close()
+    return time_locked
 
 
 ########################################################################################################################

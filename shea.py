@@ -23,7 +23,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.39"
+BOT_VERSION = "0.0.40"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -279,7 +279,7 @@ async def clear_locks(self):
     await self.respond(f"Clearing function locks.")
     lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
     with open(lock_file_path, 'r') as lock_file:
-        lock_data = json.dumps(lock_file, indent=2)
+        lock_data = lock_file.read()
         await self.respond(f"```{lock_data}```", ephemeral=True)
         lock_file.close()
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested clearing function locks: {lock_file_path}")

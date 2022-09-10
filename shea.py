@@ -3,7 +3,6 @@ S.H.E.A. (aka Bae)
 
 The simple heuristic entertainment administrator.
 """
-import datetime
 
 import discord
 from discord.ext import commands
@@ -24,7 +23,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.37"
+BOT_VERSION = "0.0.38"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -274,6 +273,20 @@ async def explain(self):
 ########################################################################################################################
 
 @bae.slash_command()
+@commands.has_role("botmaster")
+async def clear_locks(self):
+    """ADMINISTRATOR ONLY: Clear all function locks."""
+    await self.respond(f"Clearing function locks.")
+    lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
+    logger.info(f"{self.author.name} (ID: {self.author.id}) requested clearing function locks: {lock_file_path}")
+    try:
+        os.remove(lock_file_path)
+        logger.info(f"Function locks cleared {lock_file_path}")
+    except OSError:
+        logger.error(f"Failed to clear function lock file! {lock_file_path}")
+
+
+@bae.slash_command()
 async def shutdown(self):
     """BOT OWNER ONLY: Request remote shutdown."""
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested remote shutdown.")
@@ -282,7 +295,6 @@ async def shutdown(self):
         await self.respond(f"Shutting down...")
         try:
             await bae.close()
-            print(f"{BOT_NAME} shut down gracefully.")
         except Exception as shutdown_error:
             logger.fatal("Failed to exit gracefully!", shutdown_error)
             exit(1)
@@ -308,7 +320,7 @@ async def update(self):
     logger.info(f"{self.author.name} (ID: {self.author.id}) requested a SHEA update.")
 
     if time_lock(self, "update", 30) is True:
-        await self.send("Too soon to run an update! Wait 30 seconds.")
+        await self.send("An update was run recently. Please wait and try again.")
     else:
         git_repo = git.Repo('.')
         git_branch = "trunk"

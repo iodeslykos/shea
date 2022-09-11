@@ -4,7 +4,7 @@
 # { install-venv.sh } -- A helper script to quickly create and configure a Python3 virtual environment.
 ###
 
-version="0.1.2"
+version="0.1.3"
 
 py_name="SHEA"
 install_venv="y"
@@ -56,7 +56,7 @@ else
     esac
   done
   while true; do
-    read -rp "[ ?? ] Install latest version of Py-cord? (Not recommended) y/N " prompt
+    read -rp "[ ?? ] Install latest version of Py-cord? (for testing) y/N " prompt
     case $prompt in
       [Yy])
         install_latest_pycord="y"
@@ -103,7 +103,6 @@ if [ $install_venv = "y" ]; then
   fi
 
   # For installation of latest version of Py-cord.
-  # No longer recommended due to breaking changes in versions > 2.0.1.
   if [ $install_latest_pycord = "y" ]; then
     echo "$tag_info Installing latest version of Py-cord!"
     if $venv_path/bin/pip3 install -U git+https://github.com/Pycord-Development/pycord 1> /dev/null 2>&1; then

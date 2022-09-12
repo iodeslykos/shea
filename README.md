@@ -15,13 +15,47 @@ This one's simple: A Discord bot initially dreamt up to serve the needs of the F
 
 We recommend creating a virtual environment since--after all--this Python we're dealing with. Stuff breaks.
 
-Running the [`install-venv.sh`](install-venv.sh) script included in this repository will automatically create a virtual environment and install the required packages for you. Once the virtual environment is successfully created, you may activate it with the following command: 
+There are two methods provided for setup.
+
+#### Method 1: `Makefile` (Preferred)
+
+To create a Python3 virtual environment and install all require modules, simply run:
+
+```
+make setup
+```
+
+To upgrade Python3 modules:
+
+```
+make upgrade
+```
+
+To remove the virtual environment and before running `make setup` again:
+
+```
+make clean
+```
+
+#### Method 2: `setup-venv.sh`
+
+Running the [`setup-venv.sh`](scripts/setup-venv.sh) script included in this repository will automatically create a virtual environment and install the required packages for you.
+
+```
+./scripts/setup-venv.sh
+```
+
+Once the virtual environment is successfully created, you may activate it with the following command: 
 
 `source .venv/bin/activate`
 
 ### Configuration.
 
-Before running SHEA for the first time, create a copy of config.json.example, remove the `.example` suffix, and then configure to your liking. You will need to specify a Discord API key at the very least. For more information, please visit the [Discord Developer Portal](https://discord.com/developers/docs/intro).
+Before running SHEA for the first time, create a copy of config.json.example, rename it to `config.json`, and then configure the contents to your liking.
+
+You will need to specify a Discord API key at the very least. 
+
+For more information, please visit the [Discord Developer Portal](https://discord.com/developers/docs/intro).
 
 
 
@@ -33,12 +67,15 @@ Before running SHEA for the first time, create a copy of config.json.example, re
 - [ ] Better logging with adjustable verbosity and rotation.
 - [ ] Administrative commands, overrides, and remote update capability.
 - [ ] Better documentation and installation instructions.
+  - [ ] `config.json` explanation.
+  - [X] Explain installation options: `make` or `setup-venv.sh`.
 
 ### Wishlist.
 
 - Ability to query and display plot synopses, ratings, and a list of services where requested content is available to stream.
-- Fractal generation.
+- Image generation: fractals, quote cards, etc.
 - Return dice rolls as an image instead of text block.
+- Text-to-speech and other audio in voice channels.
 
 ## License.
 

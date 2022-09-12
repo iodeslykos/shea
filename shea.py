@@ -23,7 +23,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.40"
+BOT_VERSION = "0.0.41"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -46,9 +46,9 @@ CONFIG_PATH = 'config.json'
 try:
     CONFIG_FILE = open(CONFIG_PATH, 'r')
     CONFIG = json.load(CONFIG_FILE)
-    print(f"[INFO]: Loaded configuration file: \'{CONFIG_PATH}\'")
+    print(f"[INIT]: Loaded configuration file: {CONFIG_PATH}")
 except FileNotFoundError:
-    print(f"[ERROR] Unable to load configuration file: \'{CONFIG_PATH}\'")
+    print(f"[ERROR] Unable to load configuration file: {CONFIG_PATH}")
     exit(1)
 
 BOT_TOKEN = CONFIG['bot_token']
@@ -60,17 +60,27 @@ else:
     BOT_OWNER = None
 
 # Configure logging.
-LOG_DATE = time.now()
-LOG_DIR = CONFIG['log_dir']
-LOG_LEVEL = CONFIG['log_level']
-LOG_FILE = LOG_DATE.strftime(os.path.join(LOG_DIR, "shea-bae_%Y%m%d.log"))
-LOG_TIMESTAMP_FORMAT = CONFIG['timestamp_format']
-
-logger = logging.getLogger('main')
-
 try:
-    print(f"[INFO]: Configuring logging.")
+    print("[INIT]: Configuring logging.")
+    LOG_DATE = time.now()
+    LOG_DIR = CONFIG['log_dir']
+    LOG_LEVEL = CONFIG['log_level']
+    LOG_FILE = LOG_DATE.strftime(os.path.join(LOG_DIR, "shea-bae_%Y%m%d.log"))
+    LOG_TIMESTAMP_FORMAT = CONFIG['timestamp_format']
+
+    logger = logging.getLogger('main')
+    try:
+        if os.path.exists(LOG_DIR):
+            logger.info(f"Log directory already exists: {LOG_DIR}")
+        else:
+            logger.info(f"Log directory does not exist. Creating {LOG_DIR}")
+            os.makedirs(LOG_DIR, exist_ok=True)
+    except OSError:
+        logger.info(f"Unable to create log path: {LOG_DIR}")
+        exit(2)
+
     logger.setLevel(LOG_LEVEL)
+
     # Desired format: TIMESTAMP LOGLEVEL USER USER_ID FUNC_NAME?
     logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s',
                                       datefmt=LOG_TIMESTAMP_FORMAT)
@@ -79,15 +89,6 @@ try:
         stream_handler = logging.StreamHandler()
         stream_handler.setFormatter(logger_format)
         logger.addHandler(stream_handler)
-    try:
-        if os.path.exists(LOG_DIR):
-            logger.info(f"Log directory already exists: {LOG_DIR}")
-        else:
-            logger.info(f"Log directory does not exist. Creating {LOG_DIR}")
-            os.makedirs(LOG_DIR, exist_ok=True)
-    except TypeError:
-        logger.info(f"Unable to create log path: {LOG_DIR}")
-        exit(2)
     file_handler = logging.FileHandler(
         filename=LOG_FILE, encoding='utf-8', mode='a')
     file_handler.setLevel(LOG_LEVEL)

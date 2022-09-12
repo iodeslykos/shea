@@ -23,7 +23,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.41"
+BOT_VERSION = "0.0.42"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -144,7 +144,7 @@ async def on_ready():
     INIT_TIME = time.utcnow()
     logger.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
     # Tell everyone that you're online, SHEA! Only sends to DEBUG channels.
-    await startup_prompt(bae.user)
+    await startup_message(bae.user)
 
 
 @bae.event
@@ -380,12 +380,12 @@ def restart_bot():
         raise restart_error
 
 
-async def startup_prompt(bot_name):
+async def startup_message(bot_name):
     """Send message to selected channel to announce ready."""
     startup_messages_file = 'media/text/startup-messages.txt'
     if os.path.exists(startup_messages_file):
-        if 'startup_prompt' in CONFIG:
-            if CONFIG['startup_prompt'].lower() != 'false':
+        if 'startup_message' in CONFIG:
+            if CONFIG['startup_message'].lower() != 'false':
                 try:
                     prompts = open(startup_messages_file, 'r').read().splitlines()
                     prompt = secrets.choice(prompts)
@@ -405,7 +405,7 @@ async def startup_prompt(bot_name):
             else:
                 logger.info(f"Startup message disabled.")
         else:
-            logger.warning(f"\'startup_prompt\' not present in {CONFIG_PATH}")
+            logger.warning(f"Key 'startup_message' not present in {CONFIG_PATH}")
     else:
         logger.warning(f"File {startup_messages_file} could not be found!")
 

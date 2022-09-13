@@ -26,7 +26,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.43"
+BOT_VERSION = "0.0.45"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -39,7 +39,12 @@ v{BOT_VERSION}
 
 # Commence!
 
-INIT_TIME = int(time.mktime(datetime.now().utctimetuple()))
+# Track initialization time.
+INIT_TIME = {
+    'unix': int(time.mktime(datetime.now().utctimetuple())),
+    'local': datetime.now(),
+    'utc': datetime.utcnow()
+}
 
 print(f"{BOT_BANNER}")
 
@@ -199,37 +204,35 @@ async def spaghetti_wolf(ctx):
     image_path = os.path.join(MEDIA_DIR['image'], "spaghetti-wolf")
     file = secrets.choice(os.listdir(image_path))
     file_path = os.path.join(image_path, file)
-    await ctx.respond(":spaghetti::wolf: is the best I can do.")
-    # Need to test this. Not sure if it's latency or a timeout, but the image fails to send via self.respond().
-    # May be due to upload speeds being abysmal at the current time.
-    # try:
-    #     await self.send(file=discord.File(file_path))
-    #     _log.info(f"{self.author.name} (ID: {self.author.id}) was sent a spaghetti_wolf: {file}")
-    # except FileNotFoundError:
-    #     _log.warning(f"{self.author.name} (ID: {self.author.id}) requested spaghetti wolf, but it was not found!"
-    #                  f"{file_path}")
+    # Need to test this. Not sure if it's due to latency or a timeout, but the image fails to send via self.respond().
+    # May be due to upload speeds being abysmal at the current time, so an ephemeral response will suffice for now.
+    try:
+        await ctx.respond("LUPINE PASTA INCOMING", ephemeral=True)
+        await ctx.send(file=discord.File(file_path))
+        _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) was sent a spaghetti_wolf: {file}")
+    except FileNotFoundError:
+        await ctx.respond(":spaghetti::wolf: is the best I can do.")
+        _log.warning(f"{ctx.author.name} (ID: {ctx.author.id}) requested spaghetti wolf, but it was not found!"
+                     f"{file_path}")
 
 
 @bae.bridge_command(name="ping")
 async def ping(ctx):
     """Confirm that the bot is running."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) sent a ping request")
-    timeout = 30
+    time_unix = INIT_TIME['unix']
+    msg_time_alive = f"\n\nBy the way: I've been alive since <t:{time_unix}:R>."
     try:
         i = secrets.randbelow(3)
         if i == 0:
             await ctx.respond(
-                f"Received ping from {ctx.author.mention}. Ack? \
-                \n(Been alive since <t:{INIT_TIME}:R>)", ephemeral=True)
+                f"Received ping from {ctx.author.mention}. Ack? {msg_time_alive}", ephemeral=True)
         elif i == 1:
             await ctx.respond(
-                f"Yes, I'm here. Thanks for asking, {ctx.author.mention}. \
-                \n(Been alive since <t:{INIT_TIME}:R>)", ephemeral=True)
+                f"Yes, I'm here. Thanks for asking, {ctx.author.mention}. {msg_time_alive}", ephemeral=True)
         else:
-            await ctx.respond(f"There is no \"why\", {ctx.author.mention}. \
-                \n(Been alive since <t:{INIT_TIME}:R>)", ephemeral=True)
-        _log.debug(f"{ctx.author.name} (ID: {ctx.author.id}) was sent a reply with uptime. \
-                  (Been alive since <t{INIT_TIME}:R>)")
+            await ctx.respond(f"There is no \"why\", {ctx.author.mention}. {msg_time_alive}", ephemeral=True)
+        _log.debug(f"{ctx.author.name} (ID: {ctx.author.id}) was sent a reply with uptime. ")
     except Exception as ping_error:
         _log.error(f"Failed to respond to ping from {ctx.author.name} (ID: {ctx.author.id}!", ping_error)
 
@@ -240,10 +243,10 @@ async def gimme_my_data(ctx):
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested their user data")
     try:
         user_data = {
-            'self': {
-                'self.author.mention': ctx.author.mention,
-                'self.author.id': ctx.author.id,
-                'self.author.name': ctx.author.name,
+            'ctx.author': {
+                'ctx.author.name': ctx.author.name,
+                'ctx.author.id': ctx.author.id,
+                'ctx.author.mention': ctx.author.mention,
             }
         }
         await ctx.respond("```" + json.dumps(user_data, indent=4) + "```", ephemeral=True)
@@ -275,8 +278,23 @@ async def steve(ctx):
 async def explain(ctx):
     """For now just check the README."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested an explanation")
-    await ctx.respond(
-        f"I am a work in progress. Currently, I am running `v{BOT_VERSION}`, but one day hope to hit v1.0.0!")
+    bot_info = {
+        "bot_name": BOT_NAME,
+        "bot_version": BOT_VERSION,
+        "running_since": f"{INIT_TIME['utc']}Z"
+    }
+    msg = f"Hi, I'm Bae and I am a work in progress. \n```{json.dumps(bot_info, indent=2)}```"
+    await ctx.respond(msg, ephemeral=True)
+    _log.debug("Explanation sent.", msg)
+
+
+@bae.bridge_command(name="buttontest")
+async def button_test(self):
+    """Provide the buttons. A test of buttons."""
+    _log.info(f"{self.author.name} (ID: {self.author.id}) requested some buttons!")
+    button_test_view = views.GeneralResponseButtons()
+    button_test_view.add_item(views.ButtonLinks.github)
+    await self.respond("I provide for thee many buttons!", view=button_test_view, ephemeral=True)
 
 
 ########################################################################################################################
@@ -287,16 +305,18 @@ async def explain(ctx):
 @commands.has_role("botmaster")
 async def clear_locks(ctx):
     """ADMINISTRATOR ONLY: Clear all function locks."""
+    _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested to clear function locks.")
     await ctx.respond(f"Clearing function locks.")
     lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
     with open(lock_file_path, 'r') as lock_file:
+        _log.debug(f"Opening lock file: {lock_file_path}")
         lock_data = lock_file.read()
         await ctx.respond(f"```{lock_data}```", ephemeral=True)
+        _log.debug(f"Closing lock file: {lock_file_path}")
         lock_file.close()
-    _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested clearing function locks: {lock_file_path}")
     try:
         os.remove(lock_file_path)
-        _log.info(f"Function locks cleared {lock_file_path}")
+        _log.info(f"Function locks cleared.")
     except OSError:
         _log.error(f"Failed to clear function lock file! {lock_file_path}")
 
@@ -305,21 +325,24 @@ async def clear_locks(ctx):
 async def shutdown(ctx):
     """BOT OWNER ONLY: Request remote shutdown."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested remote shutdown.")
-    await bae.is_owner(ctx.guild.owner)
-    _log.info(f"Shutting down...")
-    await ctx.respond(f"Shutting down...")
-    try:
-        await bae.close()
-    except Exception as shutdown_error:
-        _log.fatal("Failed to exit gracefully!", shutdown_error)
-        exit(1)
+    if await bae.is_owner(ctx.guild.owner):
+        _log.info(f"Shutting down...")
+        await ctx.respond(f"Shutting down...")
+        try:
+            await bae.close()
+        except Exception as shutdown_error:
+            _log.fatal("Failed to exit gracefully!", shutdown_error)
+            exit(1)
+    else:
+        _log.warning(f"{ctx.author.name} (ID: {ctx.author.id}) is not guild owner! Warning.")
+        await ctx.respond(f"I can't do that, {ctx.author.name}. You aren't the owner of {ctx.guild.name}.")
 
 
 @bae.slash_command()
 @commands.has_role("botmaster")
 async def restart(ctx):
     """ADMINISTRATOR ONLY: Request remote restart."""
-    await ctx.respond(f"Attempting restart.")
+    await ctx.respond(f"Restarting now!")
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested restart.")
     restart_bot()
 
@@ -423,37 +446,41 @@ def time_lock(ctx, function_name, delay_in_seconds: int):
     last_user_id = ctx.author.id
     last_user_name = ctx.author.name
 
+    # If the lock file doesn't exist or is empty, create first entry with this:
     lock_init_dict = {function_name: {"last_run": time_now}}
 
     # Attempt to open lock file.
     if os.path.isfile(lock_file_path) is True:
         _log.debug(f"Lock file found: {lock_file_path}")
         with open(lock_file_path, 'r') as lock_file:
+            _log.debug(f"Opened {lock_file_path}")
             lock_data = json.load(lock_file)
         if function_name in lock_data:
             time_run = datetime.fromisoformat(lock_data[function_name]['last_run'])
             time_delta = time_now - time_run
             if time_delta > timedelta(seconds=delay_in_seconds):
-                logging.debug(f"Time since last run of {function_name} is > {delay_in_seconds}. Running.")
+                logging.info(f"Time since last run of {function_name} is > {delay_in_seconds}. Running.")
                 lock_data[function_name]["last_run"] = time_now
                 lock_data[function_name]["last_user_id"] = last_user_id
                 lock_data[function_name]["last_user_name"] = last_user_name
                 with open(lock_file_path, 'w') as lock_file:
+                    _log.info(f"Writing lock data for {function_name} to {lock_file_path}:\n", json.dumps(lock_data))
                     json.dump(lock_data, lock_file, indent=2, default=str)
             else:
                 time_locked = True
-                logging.debug(f"Time since last run of {function_name} is < {delay_in_seconds}. Not running.")
+                logging.info(f"Time since last run of {function_name} is < {delay_in_seconds}. Not running.")
         else:
             lock_data |= lock_init_dict
             with open(lock_file_path, 'w') as lock_file:
                 json.dump(lock_data, lock_file, indent=2, default=str)
 
     else:
-        _log.debug(f"Lock file not found. Creating: {lock_file_path}")
+        _log.warning(f"Lock file not found. Creating {lock_file_path}")
         lock_file = open(lock_file_path, 'x+')
         json.dump(lock_init_dict, lock_file, indent=2, default=str)
 
     lock_file.close()
+    _log.debug(f"Closed {lock_file_path}")
     return time_locked
 
 

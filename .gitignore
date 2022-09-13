@@ -24,7 +24,7 @@ __pycache__/
 # SHEA files.
 config.json
 data/
-logs/*.log
+logs/
 media/
 out/
 

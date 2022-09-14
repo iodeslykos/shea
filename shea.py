@@ -450,12 +450,21 @@ def time_lock(ctx, function_name, delay_in_seconds: int):
         }
     }
 
+    # TODO: Fix the logic for lock file.
+    #  Keeps throwing TypeError: Object of type datetime is not JSON serializable.
+
     # Attempt to open lock file.
     if os.path.isfile(lock_file_path) is True:
         _log.debug(f"Lock file found: {lock_file_path}")
         with open(lock_file_path, 'r') as lock_file:
-            _log.debug(f"Opened {lock_file_path}")
-            lock_data = json.load(lock_file)
+            if lock_file.read(1) is '{':
+                try:
+                    lock_data = json.load(lock_file)
+                    _log.debug(f"Opened {lock_file_path}")
+                except IOError:
+                    _log.error(f"Lock file is unreadable! {lock_file_path}", IOError)
+                    _log.warning(f"Deleting lock file: {lock_file_path}")
+                    os.remove(lock_file_path)
         if function_name in lock_data:
             time_run = datetime.fromisoformat(lock_data[function_name]['last_run'])
             time_delta = time_now - time_run

@@ -3,8 +3,9 @@ S.H.E.A. (aka Bae)
 
 The simple heuristic entertainment administrator.
 """
-import datetime
 
+import datetime
+import asyncio
 import discord
 from discord.ext import commands
 from discord.ext import bridge
@@ -26,7 +27,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.45"
+BOT_VERSION = "0.0.46"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -63,7 +64,7 @@ BOT_TOKEN = CONFIG['bot_token']
 BOT_NAME = CONFIG['bot_name']
 
 if 'bot_owner' in CONFIG:
-    BOT_OWNER = CONFIG['bot_owner']
+    BOT_OWNER = int(CONFIG['bot_owner'])
 else:
     BOT_OWNER = None
 
@@ -165,7 +166,8 @@ bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents
 async def on_ready():
     _log.info(f"Logged in as {bae.user} (ID: {bae.user.id})")
     # Tell everyone that you're online, SHEA! Only sends to DEBUG channels.
-    await startup_message(bae.user)
+    if bae.is_ready():
+        await startup_message(bae.user)
 
 
 @bae.event
@@ -322,20 +324,17 @@ async def clear_locks(ctx):
 
 
 @bae.slash_command()
+@commands.has_role("botmaster")
 async def shutdown(ctx):
-    """BOT OWNER ONLY: Request remote shutdown."""
+    """Request remote shutdown."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested remote shutdown.")
-    if await bae.is_owner(ctx.guild.owner):
-        _log.info(f"Shutting down...")
-        await ctx.respond(f"Shutting down...")
-        try:
-            await bae.close()
-        except Exception as shutdown_error:
-            _log.fatal("Failed to exit gracefully!", shutdown_error)
-            exit(1)
-    else:
-        _log.warning(f"{ctx.author.name} (ID: {ctx.author.id}) is not guild owner! Warning.")
-        await ctx.respond(f"I can't do that, {ctx.author.name}. You aren't the owner of {ctx.guild.name}.")
+    _log.info(f"Shutting down...")
+    await ctx.respond(f"Shutting down...")
+    try:
+        await bae.close()
+    except Exception as shutdown_error:
+        _log.fatal("Failed to exit gracefully!", shutdown_error)
+        exit(1)
 
 
 @bae.slash_command()
@@ -447,7 +446,12 @@ def time_lock(ctx, function_name, delay_in_seconds: int):
     last_user_name = ctx.author.name
 
     # If the lock file doesn't exist or is empty, create first entry with this:
-    lock_init_dict = {function_name: {"last_run": time_now}}
+    lock_init_dict = {function_name: {
+            "last_run": time_now,
+            "last_user_id": last_user_id,
+            "last_user_name": last_user_name
+        }
+    }
 
     # Attempt to open lock file.
     if os.path.isfile(lock_file_path) is True:

@@ -27,7 +27,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.46"
+BOT_VERSION = "0.0.47"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -199,18 +199,15 @@ async def roll(ctx, dice: int, sides: int):
         await ctx.respond(f"{roll_output}")
 
 
-@bae.bridge_command(name="spaghettiwolf")
+@bae.bridge_command(name="spaghetti_wolf")
 async def spaghetti_wolf(ctx):
     """Receive a spaghetti wolf."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested spaghetti_wolf")
     image_path = os.path.join(MEDIA_DIR['image'], "spaghetti-wolf")
     file = secrets.choice(os.listdir(image_path))
     file_path = os.path.join(image_path, file)
-    # Need to test this. Not sure if it's due to latency or a timeout, but the image fails to send via self.respond().
-    # May be due to upload speeds being abysmal at the current time, so an ephemeral response will suffice for now.
     try:
-        await ctx.respond("LUPINE PASTA INCOMING", ephemeral=True)
-        await ctx.send(file=discord.File(file_path))
+        await ctx.respond(file=discord.File(file_path))
         _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) was sent a spaghetti_wolf: {file}")
     except FileNotFoundError:
         await ctx.respond(":spaghetti::wolf: is the best I can do.")

@@ -388,14 +388,22 @@ async def update(ctx):
             restart_bot()
 
 
-@bae.slash_command(name="version")
+@bae.slash_command(name="status")
 @commands.has_role("botmaster")
-async def version(ctx):
-    """Report bot version information."""
+async def status(ctx):
+    """ADMINISTRATOR ONLY: Report bot version and other information."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested version information.")
     git_repo = git.Repo('.')
     git_hash_current = git_repo.head.object.hexsha[:7]
     active_guilds = await bae.fetch_guilds().flatten()
+    active_guilds_parsed = []
+    for guild in active_guilds:
+        guild_obj = {
+            "name": guild.name,
+            "id": guild.id,
+            "shard_id": guild.shard_id
+        }
+        active_guilds_parsed.append(guild_obj)
     bot_owner = await bae.fetch_user(BOT_OWNER)
     bot_version = f"v{BOT_VERSION}"
     version_info = {
@@ -404,7 +412,7 @@ async def version(ctx):
             "commit_hash": git_hash_current,
             "bot_owner": str(bot_owner),
             "init_time": f"{INIT_TIME['utc']}Z",
-            "active_guilds": str(active_guilds)
+            "active_guilds": active_guilds_parsed
         }
     }
     try:

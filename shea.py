@@ -26,7 +26,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.49"
+BOT_VERSION = "0.0.50"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -395,7 +395,7 @@ async def version(ctx):
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested version information.")
     git_repo = git.Repo('.')
     git_hash_current = git_repo.head.object.hexsha[:7]
-    active_guilds = bae.fetch_guilds().flatten()
+    active_guilds = await bae.fetch_guilds().flatten()
     bot_owner = await bae.fetch_user(BOT_OWNER)
     bot_version = f"v{BOT_VERSION}"
     version_info = {

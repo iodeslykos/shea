@@ -18,6 +18,7 @@ import json
 import logging
 from logging import handlers
 import git
+import socket
 
 # SHEA modules.
 import views
@@ -26,7 +27,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.50"
+BOT_VERSION = "0.0.51"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -392,7 +393,7 @@ async def update(ctx):
 @commands.has_role("botmaster")
 async def status(ctx):
     """ADMINISTRATOR ONLY: Report bot version and other information."""
-    _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested version information.")
+    _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested '{BOT_NAME}' status.")
     git_repo = git.Repo('.')
     git_hash_current = git_repo.head.object.hexsha[:7]
     active_guilds = await bae.fetch_guilds().flatten()
@@ -412,12 +413,13 @@ async def status(ctx):
             "commit_hash": git_hash_current,
             "bot_owner": str(bot_owner),
             "init_time": f"{INIT_TIME['utc']}Z",
-            "active_guilds": active_guilds_parsed
+            "active_guilds": active_guilds_parsed,
+            "hostname": socket.getfqdn()
         }
     }
     try:
-        await ctx.respond(f"```{(json.dumps(version_info, indent=2))}```", ephemeral=False)
-        _log.debug(f"{ctx.author.name} (ID: {ctx.author.id}) received version information.")
+        await ctx.respond(f"```{(json.dumps(version_info, indent=2))}```", ephemeral=True)
+        _log.debug(f"{ctx.author.name} (ID: {ctx.author.id}) received '{BOT_NAME}' status.")
     except Exception as version_error:
         _log.error(version_error)
     finally:

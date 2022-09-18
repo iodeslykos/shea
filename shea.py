@@ -437,6 +437,15 @@ def restart_bot():
         raise restart_error
 
 
+def parse_string(s: str, first_str: str, last_str: str):
+    try:
+        start = s.index(first_str) + len(first_str)
+        stop = s.index(last_str, start)
+        return s[start:stop]
+    except ValueError:
+        return ""
+
+
 async def startup_message(bot_name):
     """Send message to selected channel to announce ready."""
     startup_messages_file = 'media/text/startup-messages.txt'

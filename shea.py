@@ -4,7 +4,6 @@ S.H.E.A. (aka Bae)
 The simple heuristic entertainment administrator.
 """
 
-import datetime
 import discord
 from discord.ext import commands
 from discord.ext import bridge
@@ -27,7 +26,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.51"
+BOT_VERSION = "0.0.52"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -148,12 +147,15 @@ except TypeError:
 
 _log.info(f"Initializing SHEA as {BOT_NAME}")
 intents = discord.Intents(
+    emojis_and_stickers=True,
     guild_reactions=True,
     guilds=True,
     members=True,
     messages=True,
     message_content=True,
-    reactions=True
+    reactions=True,
+    typing=False,
+    voice_states=True
 )
 bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 

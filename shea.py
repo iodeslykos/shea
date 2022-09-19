@@ -18,6 +18,7 @@ import logging
 from logging import handlers
 import git
 import socket
+from enum import Enum
 
 # SHEA modules.
 import views
@@ -428,6 +429,69 @@ async def status(ctx):
         # Drop GitPython to avoid memory leak.
         _log.debug(f"Closing git repository instance: {git_repo.git}.")
         git_repo.__del__()
+
+
+########################################################################################################################
+# Voice functions.
+########################################################################################################################
+
+# Below are rudimentary voice recording functions based on tutorials in documentation.
+
+# The connection cache object. Important.
+# Pay attention to how it's used in the functions below.
+connections = {}
+
+
+class Sinks(Enum):
+    mp3 = discord.sinks.MP3Sink()
+    wav = discord.sinks.WaveSink()
+    pcm = discord.sinks.PCMSink()
+    ogg = discord.sinks.OGGSink()
+    mka = discord.sinks.MKASink()
+    mkv = discord.sinks.MKVSink()
+    mp4 = discord.sinks.MP4Sink()
+    m4a = discord.sinks.M4ASink()
+
+
+async def once_done(sink: discord.sinks, channel: discord.TextChannel, *args):
+    recorded_users = [  # A list of recorded users
+        f"<@{user_id}>"
+        for user_id, audio in sink.audio_data.items()
+    ]
+    await sink.vc.disconnect()  # Disconnect from the voice channel.
+    files = [discord.File(audio.file, f"{user_id}.{sink.encoding}") for user_id, audio in sink.audio_data.items()]
+    await channel.send(f"Here's your completed audio recording: {', '.join(recorded_users)}.", files=files)
+
+
+@bae.bridge_command(name="startrecording")
+async def voice_recording_start(ctx):
+    """startRecording: Start recording audio in a joined voice channel."""
+    voice = ctx.author.voice
+
+    if not voice:
+        await ctx.respond(f"You aren't in a voice channel, {ctx.author.name}!")
+
+    vc = await voice.channel.connect()
+    connections.update({ctx.guild.id: vc})
+
+    vc.start_recording(
+        discord.sinks.WaveSink(),
+        once_done,
+        ctx.channel
+    )
+    await ctx.respond("Started recording!")
+
+
+@bae.bridge_command(name="stoprecording")
+async def voice_recording_stop(ctx):
+    """stopRecording: Stop recording audio in a joined voice channel."""
+    if ctx.guild.id in connections:
+        vc = connections[ctx.guild.id]
+        vc.stop_recording()
+        del connections[ctx.guild.id]
+        await ctx.delete()
+    else:
+        await ctx.respond("I am not currently recording in this Guild.")
 
 
 ########################################################################################################################

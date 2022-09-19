@@ -27,7 +27,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.52"
+BOT_VERSION = "0.0.53"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -353,7 +353,7 @@ async def update(ctx):
     else:
         git_repo = git.Repo('.')
         git_branch = "trunk"
-        git_hash_current = git_repo.head.object.hexsha[:7]
+        git_hash_current = git_repo.head.object.hexsha[:9]
         git_update_success = False
 
         if 'git' in CONFIG:
@@ -371,7 +371,7 @@ async def update(ctx):
         try:
             _log.info(f"Attempting to pull from origin: {git_remote}:{git_branch}")
             git_remote.pull()
-            git_hash_update = git_repo.head.object.hexsha[:7]
+            git_hash_update = git_repo.head.object.hexsha[:9]
             if git_hash_current != git_hash_update:
                 await ctx.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
                 git_update_success = True
@@ -398,7 +398,7 @@ async def status(ctx):
     """ADMINISTRATOR ONLY: Report bot version and other information."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested '{BOT_NAME}' status.")
     git_repo = git.Repo('.')
-    git_hash_current = git_repo.head.object.hexsha[:7]
+    git_hash_current = git_repo.head.object.hexsha[:9]
     active_guilds = await bae.fetch_guilds().flatten()
     active_guilds_parsed = []
     for guild in active_guilds:
@@ -465,7 +465,7 @@ async def once_done(sink: discord.sinks, channel: discord.TextChannel, *args):
 
 @bae.bridge_command(name="startrecording")
 async def voice_recording_start(ctx):
-    """startRecording: Start recording audio in a joined voice channel."""
+    """startrecording: Start recording audio in a joined voice channel."""
     voice = ctx.author.voice
 
     if not voice:
@@ -484,7 +484,7 @@ async def voice_recording_start(ctx):
 
 @bae.bridge_command(name="stoprecording")
 async def voice_recording_stop(ctx):
-    """stopRecording: Stop recording audio in a joined voice channel."""
+    """stoprecording: Stop recording audio in a joined voice channel."""
     if ctx.guild.id in connections:
         vc = connections[ctx.guild.id]
         vc.stop_recording()

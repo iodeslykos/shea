@@ -27,7 +27,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.53"
+BOT_VERSION = "0.0.54"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -48,6 +48,8 @@ INIT_TIME = {
 }
 
 print(f"{BOT_BANNER}")
+
+LOCK_DATA = dict
 
 CONFIG = {}
 CONFIG_PATH = 'config.json'
@@ -544,63 +546,15 @@ async def startup_message(bot_name):
         _log.warning(f"File {startup_messages_file} could not be found!")
 
 
-def time_lock(ctx, function_name, delay_in_seconds: int):
-    time_locked = False
-    # lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
-    # time_now = datetime.now()
-    # last_user_id = ctx.author.id
-    # last_user_name = ctx.author.name
-    #
-    # # If the lock file doesn't exist or is empty, create first entry with this:
-    # lock_init_dict = {function_name: {
-    #     "last_run": time_now,
-    #     "last_user_id": last_user_id,
-    #     "last_user_name": last_user_name
-    # }
-    # }
-    #
-    # # TODO: Fix the logic for lock file.
-    # #  Keeps throwing TypeError: Object of type datetime is not JSON serializable.
-    #
-    # # Attempt to open lock file.
-    # if os.path.isfile(lock_file_path) is True:
-    #     _log.debug(f"Lock file found: {lock_file_path}")
-    #     with open(lock_file_path, 'r') as lock_file:
-    #         if lock_file.read(1) == '{':
-    #             try:
-    #                 lock_data = json.load(lock_file)
-    #                 _log.debug(f"Opened {lock_file_path}")
-    #             except IOError:
-    #                 _log.error(f"Lock file is unreadable! {lock_file_path}", IOError)
-    #                 _log.warning(f"Deleting lock file: {lock_file_path}")
-    #                 os.remove(lock_file_path)
-    #     if function_name in lock_data:
-    #         time_run = datetime.fromisoformat(lock_data[function_name]['last_run'])
-    #         time_delta = time_now - time_run
-    #         if time_delta > timedelta(seconds=delay_in_seconds):
-    #             logging.info(f"Time since last run of {function_name} is > {delay_in_seconds}. Running.")
-    #             lock_data[function_name]["last_run"] = time_now
-    #             lock_data[function_name]["last_user_id"] = last_user_id
-    #             lock_data[function_name]["last_user_name"] = last_user_name
-    #             with open(lock_file_path, 'w') as lock_file:
-    #                 _log.info(f"Writing lock data for {function_name} to {lock_file_path}:\n", json.dumps(lock_data))
-    #                 json.dump(lock_data, lock_file, indent=2, default=str)
-    #         else:
-    #             time_locked = True
-    #             logging.info(f"Time since last run of {function_name} is < {delay_in_seconds}. Not running.")
-    #     else:
-    #         lock_data |= lock_init_dict
-    #         with open(lock_file_path, 'w') as lock_file:
-    #             json.dump(lock_data, lock_file, indent=2, default=str)
-    #
-    # else:
-    #     _log.warning(f"Lock file not found. Creating {lock_file_path}")
-    #     lock_file = open(lock_file_path, 'x+')
-    #     json.dump(lock_init_dict, lock_file, indent=2, default=str)
-    #
-    # lock_file.close()
-    # _log.debug(f"Closed {lock_file_path}")
-    return time_locked
+def time_lock(ctx, function_name: str, delay_in_seconds: int):
+    is_locked = False
+
+    # LOCK_DATA needs this keyword.
+    global LOCK_DATA
+
+    # TODO: Refactor. LOCK_DATA should be held in dict, not a file.
+
+    return is_locked
 
 
 ########################################################################################################################

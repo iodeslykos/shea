@@ -25,11 +25,11 @@ class GeneralResponseButtons(discord.ui.View):
 
 class ButtonLinks:
     github = discord.ui.Button(label="IODES LYKOS", style=discord.ButtonStyle.link,
-                      url="https://github.com/iodeslykos", emoji="<:iodes:750029680907780146>")
+                               url="https://github.com/iodeslykos", emoji="<:iodes:750029680907780146>")
 
 
 class AdminActionPrompt(discord.ui.View):
-    def __init__(self, *, timeout=180, requested_action):
+    def __init__(self, *, timeout=180):
         super().__init__(timeout=timeout)
 
     @discord.ui.button(label="SHUTDOWN", style=discord.ButtonStyle.red)

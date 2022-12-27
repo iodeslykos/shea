@@ -27,7 +27,7 @@ import views
 # Configuration.
 ########################################################################################################################
 
-BOT_VERSION = "0.0.54"
+BOT_VERSION = "0.0.55"
 BOT_BANNER = (f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
@@ -186,22 +186,22 @@ async def roll(ctx, dice: int, sides: int):
     """Roll the dice."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
     nice_try = "lol Nice try. :alien: :middle_finger:"
-    if dice > 99 or dice < 1 or sides > sys.maxsize or sides < 2:
+    if dice > 256 or dice < 1 or sides > sys.maxsize or sides < 2:
         await ctx.respond(nice_try)
         _log.warning(f"User {ctx.author.name} (ID: {ctx.author.id}) exceeded dice roll parameters!")
     else:
         ctx.roll_results = []
+        ctx.roll_total = 0
         await ctx.respond(f"Rolling {dice} dice with {sides} sides for {ctx.author.mention}!")
         for i in range(dice):
             # randbelow() generates a number between 0 and n, so add one.
             roll_result = secrets.randbelow(sides) + 1
             ctx.roll_results.append(roll_result)
-        _log.debug(f"User {ctx.author.name} (ID: {ctx.author.id}) got {ctx.roll_results}")
+            ctx.roll_total += roll_result
+        _log.info(f"User {ctx.author.name} (ID: {ctx.author.id}) got {ctx.roll_results}, total: {ctx.roll_total}")
         # Should probably create an embed to display dice rolls.
-        roll_output = "Was Lady Luck on your side?\n"
-        for i in range(dice):
-            roll_output = roll_output + f"\nRoll {i + 1}: {ctx.roll_results[i]}"
-        await ctx.respond(f"{roll_output}")
+        await ctx.respond(f"{ctx.author.name} rolled `{dice}d{sides}`!\n\n"
+                          f"Result: `{ctx.roll_results}`\nTotal: `{ctx.roll_total}`")
 
 
 @bae.bridge_command(name="spaghetti_wolf")

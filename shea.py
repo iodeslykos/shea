@@ -192,7 +192,6 @@ async def roll(ctx, dice: int, sides: int):
     else:
         ctx.roll_results = []
         ctx.roll_total = 0
-        await ctx.respond(f"Rolling {dice} dice with {sides} sides for {ctx.author.mention}!")
         for i in range(dice):
             # randbelow() generates a number between 0 and n, so add one.
             roll_result = secrets.randbelow(sides) + 1
@@ -200,7 +199,7 @@ async def roll(ctx, dice: int, sides: int):
             ctx.roll_total += roll_result
         _log.info(f"User {ctx.author.name} (ID: {ctx.author.id}) got {ctx.roll_results}, total: {ctx.roll_total}")
         # Should probably create an embed to display dice rolls.
-        await ctx.respond(f"{ctx.author.name} rolled `{dice}d{sides}`!\n\n"
+        await ctx.respond(f"Rolled {dice} dice with {sides} sides for {ctx.author.mention}!\n\n"
                           f"Result: `{ctx.roll_results}`\nTotal: `{ctx.roll_total}`")
 
 

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-# Create a tmux session and run command(s).
+###
+# { tmux_session.sh } -- Create a tmux session running SHEA!
+###
+
+# This script is intended to run on boot to ensure SHEA persists through automated system updates.
 
 session="shea"
 directory="$HOME/shea"

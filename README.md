@@ -49,6 +49,21 @@ Once the virtual environment is successfully created, you may activate it with t
 
 `source .venv/bin/activate`
 
+#### Launch on boot (optional):
+
+A script that launch SHEA in a `tmux` session has been included in [`scripts/tmux_session.sh`](scripts/tmux_session.sh). It's intended to be invoked at boot in order to ensure that SHEA will persist after power loss or reboot on Debian-based systems by adding something akin to the following line to `/etc/rc.local`:
+
+```
+# Start SHEA on boot.
+sudo -u <username> bash <path>/shea/scripts/tmux_session.sh
+```
+
+It will create a session, run SHEA, and then detatch the session. In order to access the session, simply run:
+
+```
+tmux attach-session -t shea
+```
+
 ### Configuration.
 
 Before running SHEA for the first time, create a copy of config.json.example, rename it to `config.json`, and then configure the contents to your liking.
@@ -56,8 +71,6 @@ Before running SHEA for the first time, create a copy of config.json.example, re
 You will need to specify a Discord API key at the very least. 
 
 For more information, please visit the [Discord Developer Portal](https://discord.com/developers/docs/intro).
-
-
 
 ## Features / Roadmap.
 
@@ -69,13 +82,14 @@ For more information, please visit the [Discord Developer Portal](https://discor
 - [ ] Better documentation and installation instructions.
   - [ ] `config.json` explanation.
   - [X] Explain installation options: `make` or `setup-venv.sh`.
+- [x] Script for automated creation of a `tmux` session (intended for automated launch after reboot).
 
 ### Wishlist.
 
 - Ability to query and display plot synopses, ratings, and a list of services where requested content is available to stream.
 - Image generation: fractals, quote cards, etc.
 - Return dice rolls as an image instead of text block.
-- Text-to-speech and other audio in voice channels.
+- Text-to-speech and other audio playback in voice channels.
 
 ## License.
 

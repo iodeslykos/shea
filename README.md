@@ -25,7 +25,7 @@ To create a Python3 virtual environment and install all require modules, simply 
 make setup
 ```
 
-To upgrade Python3 modules:
+To upgrade Python3 modules (utilizing `requirements.txt):
 
 ```
 make upgrade

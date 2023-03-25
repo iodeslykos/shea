@@ -28,7 +28,7 @@ import views
 ########################################################################################################################
 
 BOT_VERSION = "0.0.55"
-BOT_BANNER = (f"""  _________ ___ ______________   _____   
+BOT_BANNER = f"""  _________ ___ ______________   _____   
  /   _____//   |   \\_   _____/  /  _  \\  
  \\_____  \\/    ~    \\    __)_  /  /_\\  \\ 
  /        \\    Y    /        \\/    |    \\
@@ -36,15 +36,15 @@ BOT_BANNER = (f"""  _________ ___ ______________   _____
         \\/       \\/        \\/         \\/
 Simple Heuristic Entertainment Administrator 
 v{BOT_VERSION}
-""")
+"""
 
 # Commence!
 
 # Track initialization time.
 INIT_TIME = {
-    'unix': int(time.mktime(datetime.now().utctimetuple())),
-    'local': datetime.now(),
-    'utc': datetime.utcnow()
+    "unix": int(time.mktime(datetime.now().utctimetuple())),
+    "local": datetime.now(),
+    "utc": datetime.utcnow(),
 }
 
 print(f"{BOT_BANNER}")
@@ -52,21 +52,21 @@ print(f"{BOT_BANNER}")
 LOCK_DATA = dict
 
 CONFIG = {}
-CONFIG_PATH = 'config.json'
+CONFIG_PATH = "config.json"
 
 try:
-    CONFIG_FILE = open(CONFIG_PATH, 'r')
+    CONFIG_FILE = open(CONFIG_PATH, "r")
     CONFIG = json.load(CONFIG_FILE)
     print(f"[INIT]: Loaded configuration file: {CONFIG_PATH}")
 except FileNotFoundError:
     print(f"[ERROR] Unable to load configuration file: {CONFIG_PATH}")
     exit(1)
 
-BOT_TOKEN = CONFIG['bot_token']
-BOT_NAME = CONFIG['bot_name']
+BOT_TOKEN = CONFIG["bot_token"]
+BOT_NAME = CONFIG["bot_name"]
 
-if 'bot_owner' in CONFIG:
-    BOT_OWNER = int(CONFIG['bot_owner'])
+if "bot_owner" in CONFIG:
+    BOT_OWNER = int(CONFIG["bot_owner"])
 else:
     BOT_OWNER = None
 
@@ -75,21 +75,23 @@ else:
 ########################################################################################################################
 
 # Configure logging.
-_log = logging.getLogger('discord')
+_log = logging.getLogger("discord")
 
 try:
     print("[INIT]: Configuring logging.")
-    LOG_DIR = CONFIG['log_dir']
-    LOG_LEVEL = CONFIG['log_level']
+    LOG_DIR = CONFIG["log_dir"]
+    LOG_LEVEL = CONFIG["log_level"]
     LOG_FILE = os.path.join(LOG_DIR, f"shea-{str(BOT_NAME).lower()}.log")
-    LOG_TIMESTAMP_FORMAT = CONFIG['timestamp_format']
+    LOG_TIMESTAMP_FORMAT = CONFIG["timestamp_format"]
     # Desired format: TIMESTAMP LOGLEVEL USER USER_ID FUNC_NAME?
-    logger_format = logging.Formatter('%(asctime)s [%(levelname)s] %(funcName)s: %(message)s',
-                                      datefmt=LOG_TIMESTAMP_FORMAT)
+    logger_format = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(funcName)s: %(message)s",
+        datefmt=LOG_TIMESTAMP_FORMAT,
+    )
     _log.setLevel(LOG_LEVEL)
 
     # Console log handler.
-    if CONFIG['log_stdout']:
+    if CONFIG["log_stdout"]:
         print(f"[INFO]: Enabling logging to console.")
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(logger_format)
@@ -107,11 +109,13 @@ try:
         exit(2)
 
     # Rotating log handler.
-    file_handler = logging.handlers.TimedRotatingFileHandler(filename=LOG_FILE,
-                                                             when='midnight',
-                                                             encoding='utf-8',
-                                                             atTime=None,
-                                                             backupCount=30)
+    file_handler = logging.handlers.TimedRotatingFileHandler(
+        filename=LOG_FILE,
+        when="midnight",
+        encoding="utf-8",
+        atTime=None,
+        backupCount=30,
+    )
     file_handler.setLevel(LOG_LEVEL)
     file_handler.setFormatter(logger_format)
     _log.addHandler(file_handler)
@@ -120,21 +124,23 @@ except Exception as log_config_failure:
     exit(1)
 
 # Ensure media directory is present.
-MEDIA_DIR = CONFIG['media_dir']
+MEDIA_DIR = CONFIG["media_dir"]
 
 for directory in MEDIA_DIR:
     try:
         if os.path.exists(MEDIA_DIR[directory]):
             _log.debug(f"Media directory already exists: {MEDIA_DIR[directory]}")
         else:
-            _log.info(f"Media directory does not exist. Creating {MEDIA_DIR[directory]}")
+            _log.info(
+                f"Media directory does not exist. Creating {MEDIA_DIR[directory]}"
+            )
             os.makedirs(MEDIA_DIR[directory], exist_ok=True)
     except TypeError:
         _log.error(f"Unable to create media directory: {MEDIA_DIR[directory]}")
         exit(1)
 
 # Ensure data directory is present.
-DATA_DIR = CONFIG['data_dir']
+DATA_DIR = CONFIG["data_dir"]
 
 try:
     if os.path.exists(DATA_DIR):
@@ -158,7 +164,7 @@ intents = discord.Intents(
     message_content=True,
     reactions=True,
     typing=False,
-    voice_states=True
+    voice_states=True,
 )
 bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents)
 
@@ -166,6 +172,7 @@ bae = bridge.Bot(command_prefix=commands.when_mentioned_or("!"), intents=intents
 ########################################################################################################################
 # Events and commands.
 ########################################################################################################################
+
 
 @bae.event
 async def on_ready():
@@ -184,11 +191,15 @@ async def on_error():
 @bae.bridge_command(name="roll")
 async def roll(ctx, dice: int, sides: int):
     """Roll the dice."""
-    _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}")
+    _log.info(
+        f"{ctx.author.name} (ID: {ctx.author.id}) requested a dice roll: Dice: {dice}, Sides: {sides}"
+    )
     nice_try = "lol Nice try. :alien: :middle_finger:"
     if dice > 256 or dice < 1 or sides > sys.maxsize or sides < 2:
         await ctx.respond(nice_try)
-        _log.warning(f"User {ctx.author.name} (ID: {ctx.author.id}) exceeded dice roll parameters!")
+        _log.warning(
+            f"User {ctx.author.name} (ID: {ctx.author.id}) exceeded dice roll parameters!"
+        )
     else:
         ctx.roll_results = []
         ctx.roll_total = 0
@@ -197,47 +208,67 @@ async def roll(ctx, dice: int, sides: int):
             roll_result = secrets.randbelow(sides) + 1
             ctx.roll_results.append(roll_result)
             ctx.roll_total += roll_result
-        _log.info(f"User {ctx.author.name} (ID: {ctx.author.id}) got {ctx.roll_results}, total: {ctx.roll_total}")
+        _log.info(
+            f"User {ctx.author.name} (ID: {ctx.author.id}) got {ctx.roll_results}, total: {ctx.roll_total}"
+        )
         # Should probably create an embed to display dice rolls.
-        await ctx.respond(f"Rolled {dice} dice with {sides} sides for {ctx.author.mention}!\n\n"
-                          f"Result: `{ctx.roll_results}`\nTotal: `{ctx.roll_total}`")
+        await ctx.respond(
+            f"Rolled {dice} dice with {sides} sides for {ctx.author.mention}!\n\n"
+            f"Result: `{ctx.roll_results}`\nTotal: `{ctx.roll_total}`"
+        )
 
 
 @bae.bridge_command(name="spaghetti_wolf")
 async def spaghetti_wolf(ctx):
     """Receive a spaghetti wolf."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested spaghetti_wolf")
-    image_path = os.path.join(MEDIA_DIR['image'], "spaghetti-wolf")
+    image_path = os.path.join(MEDIA_DIR["image"], "spaghetti-wolf")
     file = secrets.choice(os.listdir(image_path))
     file_path = os.path.join(image_path, file)
     try:
         await ctx.respond(file=discord.File(file_path))
-        _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) was sent a spaghetti_wolf: {file}")
+        _log.info(
+            f"{ctx.author.name} (ID: {ctx.author.id}) was sent a spaghetti_wolf: {file}"
+        )
     except FileNotFoundError:
         await ctx.respond(":spaghetti::wolf: is the best I can do.")
-        _log.warning(f"{ctx.author.name} (ID: {ctx.author.id}) requested spaghetti wolf, but it was not found!"
-                     f"{file_path}")
+        _log.warning(
+            f"{ctx.author.name} (ID: {ctx.author.id}) requested spaghetti wolf, but it was not found!"
+            f"{file_path}"
+        )
 
 
 @bae.bridge_command(name="ping")
 async def ping(ctx):
     """Confirm that the bot is running."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) sent a ping request")
-    time_unix = INIT_TIME['unix']
+    time_unix = INIT_TIME["unix"]
     msg_time_alive = f"\n\nBy the way: I've been alive since <t:{time_unix}:R>."
     try:
         i = secrets.randbelow(3)
         if i == 0:
             await ctx.respond(
-                f"Received ping from {ctx.author.mention}. Ack? {msg_time_alive}", ephemeral=True)
+                f"Received ping from {ctx.author.mention}. Ack? {msg_time_alive}",
+                ephemeral=True,
+            )
         elif i == 1:
             await ctx.respond(
-                f"Yes, I'm here. Thanks for asking, {ctx.author.mention}. {msg_time_alive}", ephemeral=True)
+                f"Yes, I'm here. Thanks for asking, {ctx.author.mention}. {msg_time_alive}",
+                ephemeral=True,
+            )
         else:
-            await ctx.respond(f"There is no \"why\", {ctx.author.mention}. {msg_time_alive}", ephemeral=True)
-        _log.debug(f"{ctx.author.name} (ID: {ctx.author.id}) was sent a reply with uptime. ")
+            await ctx.respond(
+                f'There is no "why", {ctx.author.mention}. {msg_time_alive}',
+                ephemeral=True,
+            )
+        _log.debug(
+            f"{ctx.author.name} (ID: {ctx.author.id}) was sent a reply with uptime. "
+        )
     except Exception as ping_error:
-        _log.error(f"Failed to respond to ping from {ctx.author.name} (ID: {ctx.author.id}!", ping_error)
+        _log.error(
+            f"Failed to respond to ping from {ctx.author.name} (ID: {ctx.author.id}!",
+            ping_error,
+        )
 
 
 @bae.bridge_command(name="gimmemydata")
@@ -246,16 +277,21 @@ async def gimme_my_data(ctx):
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested their user data")
     try:
         user_data = {
-            'ctx.author': {
-                'ctx.author.name': ctx.author.name,
-                'ctx.author.id': ctx.author.id,
-                'ctx.author.mention': ctx.author.mention,
+            "ctx.author": {
+                "ctx.author.name": ctx.author.name,
+                "ctx.author.id": ctx.author.id,
+                "ctx.author.mention": ctx.author.mention,
             }
         }
-        await ctx.respond("```" + json.dumps(user_data, indent=4) + "```", ephemeral=True)
+        await ctx.respond(
+            "```" + json.dumps(user_data, indent=4) + "```", ephemeral=True
+        )
         _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) was sent their user data")
     except Exception as gimme_user_fail:
-        _log.error(f"{ctx.author.name} (ID: {ctx.author.id}) did not receive their user data!", gimme_user_fail)
+        _log.error(
+            f"{ctx.author.name} (ID: {ctx.author.id}) did not receive their user data!",
+            gimme_user_fail,
+        )
 
 
 @bae.bridge_command(name="steve")
@@ -265,15 +301,19 @@ async def steve(ctx):
         await ctx.respond("You can only handle so much Steve!")
     else:
         _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested some Steve")
-        image_path = os.path.join(MEDIA_DIR['audio'], "steve")
+        image_path = os.path.join(MEDIA_DIR["audio"], "steve")
         file = secrets.choice(os.listdir(image_path))
         file_path = os.path.join(image_path, file)
         try:
             await ctx.respond(file=discord.File(file_path))
-            _log.debug(f"{ctx.author.name} (ID: {ctx.author.id}) was sent some Steve: {file}")
+            _log.debug(
+                f"{ctx.author.name} (ID: {ctx.author.id}) was sent some Steve: {file}"
+            )
         except FileNotFoundError:
-            _log.warning(f"{ctx.author.name} (ID: {ctx.author.id}) requested some Steve, but it was not found!"
-                         f"{file_path}")
+            _log.warning(
+                f"{ctx.author.name} (ID: {ctx.author.id}) requested some Steve, but it was not found!"
+                f"{file_path}"
+            )
             await ctx.respond(":Steve: is the best I can do.")
 
 
@@ -292,21 +332,26 @@ async def button_test(ctx):
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested some buttons!")
     button_test_view = views.GeneralResponseButtons()
     button_test_view.add_item(views.ButtonLinks.github)
-    await ctx.respond("I provide for thee many buttons!", view=button_test_view, ephemeral=True)
+    await ctx.respond(
+        "I provide for thee many buttons!", view=button_test_view, ephemeral=True
+    )
 
 
 ########################################################################################################################
 # Administrative commands.
 ########################################################################################################################
 
+
 @bae.slash_command()
 @commands.has_role("botmaster")
 async def clear_locks(ctx):
     """ADMINISTRATOR ONLY: Clear all function locks."""
-    _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested to clear function locks.")
+    _log.info(
+        f"{ctx.author.name} (ID: {ctx.author.id}) requested to clear function locks."
+    )
     await ctx.respond(f"Clearing function locks.")
-    lock_file_path = os.path.join(DATA_DIR, 'lock_file.json')
-    with open(lock_file_path, 'r') as lock_file:
+    lock_file_path = os.path.join(DATA_DIR, "lock_file.json")
+    with open(lock_file_path, "r") as lock_file:
         _log.debug(f"Opening lock file: {lock_file_path}")
         lock_data = lock_file.read()
         await ctx.respond(f"```{lock_data}```", ephemeral=True)
@@ -352,16 +397,16 @@ async def update(ctx):
     if time_lock(ctx, "update", 30) is True:
         await ctx.send("An update was run recently. Please wait and try again.")
     else:
-        git_repo = git.Repo('.')
+        git_repo = git.Repo(".")
         git_branch = "trunk"
         git_hash_current = git_repo.head.object.hexsha[:9]
         git_update_success = False
 
-        if 'git' in CONFIG:
-            git_repo = git.Repo(CONFIG['git']['dir'])
-            git_branch = CONFIG['git']['branch']
+        if "git" in CONFIG:
+            git_repo = git.Repo(CONFIG["git"]["dir"])
+            git_branch = CONFIG["git"]["branch"]
 
-        git_remote = git_repo.remotes['origin']
+        git_remote = git_repo.remotes["origin"]
 
         try:
             _log.info(f"Attempting to fetch from origin: {git_remote}:{git_branch}")
@@ -374,11 +419,17 @@ async def update(ctx):
             git_remote.pull()
             git_hash_update = git_repo.head.object.hexsha[:9]
             if git_hash_current != git_hash_update:
-                await ctx.send(f"Updated from `{git_hash_current}` to `{git_hash_update}`.")
+                await ctx.send(
+                    f"Updated from `{git_hash_current}` to `{git_hash_update}`."
+                )
                 git_update_success = True
             else:
-                _log.info(f"SHEA `v{BOT_VERSION}@{git_hash_current}` is current. No update required.")
-                await ctx.send(f"SHEA `v{BOT_VERSION}@{git_hash_current}` is current. No update required.")
+                _log.info(
+                    f"SHEA `v{BOT_VERSION}@{git_hash_current}` is current. No update required."
+                )
+                await ctx.send(
+                    f"SHEA `v{BOT_VERSION}@{git_hash_current}` is current. No update required."
+                )
         except Exception as git_update_error:
             await ctx.respond(f"Error during update! Aborting! {git_update_error}")
             _log.error(f"Error during update! Aborting!", git_update_error)
@@ -398,16 +449,12 @@ async def update(ctx):
 async def status(ctx):
     """ADMINISTRATOR ONLY: Report bot version and other information."""
     _log.info(f"{ctx.author.name} (ID: {ctx.author.id}) requested '{BOT_NAME}' status.")
-    git_repo = git.Repo('.')
+    git_repo = git.Repo(".")
     git_hash_current = git_repo.head.object.hexsha[:9]
     active_guilds = await bae.fetch_guilds().flatten()
     active_guilds_parsed = []
     for guild in active_guilds:
-        guild_obj = {
-            "name": guild.name,
-            "id": guild.id,
-            "shard_id": guild.shard_id
-        }
+        guild_obj = {"name": guild.name, "id": guild.id, "shard_id": guild.shard_id}
         active_guilds_parsed.append(guild_obj)
     bot_owner = await bae.fetch_user(BOT_OWNER)
     bot_version = f"v{BOT_VERSION}"
@@ -418,12 +465,16 @@ async def status(ctx):
             "bot_owner": str(bot_owner),
             "init_time": f"{INIT_TIME['utc']}Z",
             "active_guilds": active_guilds_parsed,
-            "hostname": socket.getfqdn()
+            "hostname": socket.getfqdn(),
         }
     }
     try:
-        await ctx.respond(f"```{(json.dumps(version_info, indent=2))}```", ephemeral=True)
-        _log.debug(f"{ctx.author.name} (ID: {ctx.author.id}) received '{BOT_NAME}' status.")
+        await ctx.respond(
+            f"```{(json.dumps(version_info, indent=2))}```", ephemeral=True
+        )
+        _log.debug(
+            f"{ctx.author.name} (ID: {ctx.author.id}) received '{BOT_NAME}' status."
+        )
     except Exception as version_error:
         _log.error(version_error)
     finally:
@@ -456,12 +507,17 @@ class Sinks(Enum):
 
 async def once_done(sink: discord.sinks, channel: discord.TextChannel, *args):
     recorded_users = [  # A list of recorded users
-        f"<@{user_id}>"
-        for user_id, audio in sink.audio_data.items()
+        f"<@{user_id}>" for user_id, audio in sink.audio_data.items()
     ]
     await sink.vc.disconnect()  # Disconnect from the voice channel.
-    files = [discord.File(audio.file, f"{user_id}.{sink.encoding}") for user_id, audio in sink.audio_data.items()]
-    await channel.send(f"Here's your completed audio recording: {', '.join(recorded_users)}.", files=files)
+    files = [
+        discord.File(audio.file, f"{user_id}.{sink.encoding}")
+        for user_id, audio in sink.audio_data.items()
+    ]
+    await channel.send(
+        f"Here's your completed audio recording: {', '.join(recorded_users)}.",
+        files=files,
+    )
 
 
 @bae.bridge_command(name="startrecording")
@@ -475,11 +531,7 @@ async def voice_recording_start(ctx):
     vc = await voice.channel.connect()
     connections.update({ctx.guild.id: vc})
 
-    vc.start_recording(
-        discord.sinks.WaveSink(),
-        once_done,
-        ctx.channel
-    )
+    vc.start_recording(discord.sinks.WaveSink(), once_done, ctx.channel)
     await ctx.respond("Started recording!")
 
 
@@ -499,9 +551,10 @@ async def voice_recording_stop(ctx):
 # Other functions.
 ########################################################################################################################
 
+
 def restart_bot():
     try:
-        os.execv(sys.executable, ['python3'] + sys.argv)
+        os.execv(sys.executable, ["python3"] + sys.argv)
     except Exception as restart_error:
         raise restart_error
 
@@ -517,24 +570,32 @@ def parse_string(s: str, first_str: str, last_str: str):
 
 async def startup_message(bot_name):
     """Send message to selected channel to announce ready."""
-    startup_messages_file = 'media/text/startup-messages.txt'
+    startup_messages_file = "media/text/startup-messages.txt"
     if os.path.exists(startup_messages_file):
-        if 'startup_message' in CONFIG:
-            if CONFIG['startup_message'].lower() != 'false':
+        if "startup_message" in CONFIG:
+            if CONFIG["startup_message"].lower() != "false":
                 try:
-                    prompts = open(startup_messages_file, 'r').read().splitlines()
+                    prompts = open(startup_messages_file, "r").read().splitlines()
                     prompt = secrets.choice(prompts)
                 except FileNotFoundError:
-                    _log.warning(f"{startup_messages_file} not found! Using default message.")
+                    _log.warning(
+                        f"{startup_messages_file} not found! Using default message."
+                    )
                     prompt = f"Initialization of {bot_name} complete."
                 try:
-                    for guild in CONFIG['discord_guilds']:
-                        debug_channels = CONFIG['discord_guilds'][guild]['channels']['debug']
-                        guild_id = CONFIG['discord_guilds'][guild]['id']
+                    for guild in CONFIG["discord_guilds"]:
+                        debug_channels = CONFIG["discord_guilds"][guild]["channels"][
+                            "debug"
+                        ]
+                        guild_id = CONFIG["discord_guilds"][guild]["id"]
                         for debug_channel in debug_channels:
-                            _log.info(f"Announcing activation in guild \"{guild}\" (ID: {guild_id}, CHANNEL: "
-                                      f"{debug_channel}): \"{prompt}\"")
-                            await bae.get_channel(int(debug_channel)).send(f"```{BOT_BANNER}```\n\"{prompt}\"")
+                            _log.info(
+                                f'Announcing activation in guild "{guild}" (ID: {guild_id}, CHANNEL: '
+                                f'{debug_channel}): "{prompt}"'
+                            )
+                            await bae.get_channel(int(debug_channel)).send(
+                                f'```{BOT_BANNER}```\n"{prompt}"'
+                            )
                 except Exception as announce_error:
                     _log.error(f"Failed to announce activation!", announce_error)
             else:

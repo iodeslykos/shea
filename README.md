@@ -51,7 +51,7 @@ Once the virtual environment is successfully created, you may activate it with t
 
 #### Launch on boot (optional):
 
-A script that launch SHEA in a `tmux` session has been included in [`scripts/tmux_session.sh`](scripts/tmux_session.sh). It's intended to be invoked at boot in order to ensure that SHEA will persist after power loss or reboot on Debian-based systems by adding something akin to the following line to `/etc/rc.local`:
+A script that launch SHEA in a `tmux` session has been included in [`scripts/tmux_session.sh`](scripts/tmux_session.sh). It's intended to be invoked at boot in order to ensure that SHEA will persist after power loss or reboot on Debian-based systems by adding the following to `/etc/rc.local`:
 
 ```
 # Start SHEA on boot.
